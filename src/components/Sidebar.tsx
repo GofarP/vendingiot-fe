@@ -6,7 +6,7 @@ import { LayoutDashboard, Users, Package, Settings, LogOut, ChevronRight, X } fr
 const menuGroups = [
   { title: "Utama", items: [{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }] },
   { title: "Data Master", items: [
-    { name: "Karyawan", href: "/dashboard/karyawan", icon: Users },
+    { name: "Employee", href: "/employee", icon: Users },
     { name: "Inventaris", href: "/dashboard/inventory", icon: Package }
   ]},
   { title: "Sistem", items: [{ name: "Pengaturan", href: "/dashboard/settings", icon: Settings }] }
