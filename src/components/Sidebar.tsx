@@ -2,18 +2,24 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, Users, Package, Settings, LogOut, ChevronRight, X } from "lucide-react";
+import { useLogout } from "../hooks/useLogout";
+import { useAuth } from "../context/AuthContext";
 
 const menuGroups = [
   { title: "Utama", items: [{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard }] },
-  { title: "Data Master", items: [
-    { name: "Employee", href: "/employee", icon: Users },
-    { name: "Inventaris", href: "/dashboard/inventory", icon: Package }
-  ]},
+  {
+    title: "Data Master", items: [
+      { name: "Employee", href: "/employee", icon: Users },
+      { name: "Inventaris", href: "/dashboard/inventory", icon: Package }
+    ]
+  },
   { title: "Sistem", items: [{ name: "Pengaturan", href: "/dashboard/settings", icon: Settings }] }
 ];
 
 export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsOpen: (v: boolean) => void }) {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const { logout, isLoggingOut } = useLogout();
 
   return (
     <aside className={`fixed left-0 top-0 h-screen w-64 bg-blue-900 text-white flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
@@ -49,7 +55,12 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsO
       </nav>
 
       <div className="p-4 border-t border-blue-800">
-        <button className="flex items-center gap-3 w-full p-3 text-blue-300 hover:text-white rounded-xl transition-all"><LogOut size={18} /> <span className="font-semibold text-[13px]">Keluar</span></button>
+        <button className="flex items-center gap-3 w-full p-3 text-blue-300 hover:text-white rounded-xl transition-all" onClick={logout}>
+            <LogOut size={18} /> 
+           <span className="font-semibold text-[13px]">
+              Keluar
+           </span>
+          </button>
       </div>
     </aside>
   );
