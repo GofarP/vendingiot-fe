@@ -20,6 +20,7 @@ export const useLogout=()=>{
             setUser(null);
             router.push("/login");
             setIsLoggingOut(true);
+            localStorage.clear();
         }
     };
 

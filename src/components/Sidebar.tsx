@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useLogout } from "../hooks/useLogout";
 import { useAuth } from "../context/AuthContext";
-import { title } from "process";
+import { permission, title } from "process";
 
 const menuGroups = [
   {
@@ -29,7 +29,12 @@ const menuGroups = [
         icon: Users,
         permission: "",
       },
-      { name: "Inventaris", href: "/inventory", icon: Package },
+      {
+        name: "Department",
+        href: "/department",
+        icon: Package,
+        permission: "",
+      },
     ],
   },
   {
@@ -64,7 +69,8 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen w-64 bg-blue-900 text-white flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+      className={`fixed left-0 top-0 h-screen w-64 bg-blue-900 text-white flex flex-col z-50 transition-transform duration-300 
+      ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
     >
       <div className="p-6 flex items-center justify-between border-b border-blue-800">
         <div className="flex items-center gap-3">
@@ -96,7 +102,6 @@ export default function Sidebar({
                   <Link
                     key={item.name}
                     href={item.href}
-                    onClick={() => setIsOpen(false)}
                     className={`flex items-center justify-between p-3 rounded-xl transition-all ${active ? "bg-blue-600 shadow-lg shadow-blue-900/50" : "hover:bg-blue-800/50 text-blue-100/70"}`}
                   >
                     <div className="flex items-center gap-3">
