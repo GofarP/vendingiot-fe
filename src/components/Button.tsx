@@ -1,9 +1,11 @@
 "use client";
 import React from "react";
+import { Loader2 } from "lucide-react"; 
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "danger" | "outline";
   icon?: React.ReactNode;
+  isLoading?: boolean; 
 }
 
 export default function Button({
@@ -11,6 +13,8 @@ export default function Button({
   variant = "primary",
   icon,
   className,
+  isLoading = false,
+  disabled,
   ...props
 }: ButtonProps) {
   const styles = {
@@ -22,6 +26,8 @@ export default function Button({
 
   return (
     <button
+      // Tombol otomatis disabled kalau lagi loading
+      disabled={disabled || isLoading}
       className={`
         flex items-center justify-center gap-2 
         px-6 py-2.5 
@@ -30,15 +36,25 @@ export default function Button({
         whitespace-nowrap  
         shrink-0     
         transition-all active:scale-95 
-        disabled:opacity-50 
+        disabled:opacity-50 disabled:cursor-not-allowed
         ${styles[variant]} 
         ${className}
       `}
       {...props}
     >
-      {/* Bungkus icon dan children agar sejajar sempurna */}
-      {icon && <span className="flex-shrink-0">{icon}</span>}
-      <span>{children}</span>
+      {isLoading ? (
+        // Tampilan saat loading: Spinner berputar
+        <>
+          <Loader2 className="animate-spin" size={18} />
+          <span>Mohon Tunggu...</span>
+        </>
+      ) : (
+        // Tampilan normal
+        <>
+          {icon && <span className="flex-shrink-0">{icon}</span>}
+          <span>{children}</span>
+        </>
+      )}
     </button>
   );
 }

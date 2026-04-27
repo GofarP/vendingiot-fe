@@ -42,7 +42,6 @@ const Input = ({
       )}
 
       <div className="relative group">
-        {/* Render Ikon Kiri jika ada */}
         {leftIcon && (
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
             {leftIcon}

@@ -2,10 +2,13 @@
 import React, { useState } from "react";
 import { Menu, Bell, UserCircle, ChevronDown } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useLogout } from "../hooks/useLogout";
 
 export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
   const { user } = useAuth();
   const [showProfile, setShowProfile] = useState(false);
+  const { logout, isLoggingOut } = useLogout();
+
 
   return (
     <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 md:px-8 sticky top-0 z-40">
@@ -69,11 +72,17 @@ export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
                   </p>
                 </div>
 
-                <button className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                  Profil Saya
-                </button>
+
                 <button className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                   Pengaturan Akun
+                </button>
+                <button className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                  onClick={() => {
+                    logout();
+                  }}
+                  disabled={isLoggingOut}
+                >
+                  Logout
                 </button>
               </div>
             </>

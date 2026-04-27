@@ -9,11 +9,9 @@ import {
   LogOut,
   ChevronRight,
   X,
-  User,
 } from "lucide-react";
 import { useLogout } from "../hooks/useLogout";
 import { useAuth } from "../context/AuthContext";
-import { permission, title } from "process";
 
 const menuGroups = [
   {
@@ -53,8 +51,14 @@ export default function Sidebar({
   setIsOpen: (v: boolean) => void;
 }) {
   const pathname = usePathname();
-  const { user, hasPermission, isLoading } = useAuth();
+  const { hasPermission, isLoading } = useAuth();
   const { logout, isLoggingOut } = useLogout();
+
+  const handleItemClick = () => {
+    if (window.innerWidth < 1024) {
+      setIsOpen(false);
+    }
+  };
 
   const filteredMenu = menuGroups
     .map((group) => ({
@@ -70,8 +74,13 @@ export default function Sidebar({
   return (
     <aside
       className={`fixed left-0 top-0 h-screen w-64 bg-blue-900 text-white flex flex-col z-50 transition-transform duration-300 
-      ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+      ${isOpen ? "translate-x-0" : "-translate-x-full"} 
+      lg:translate-x-0`} 
     >
+      {/* CATATAN: lg:translate-x-0 memastikan sidebar 
+          selalu terlihat di desktop meskipun state isOpen = false 
+      */}
+
       <div className="p-6 flex items-center justify-between border-b border-blue-800">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center font-black italic">
@@ -102,7 +111,12 @@ export default function Sidebar({
                   <Link
                     key={item.name}
                     href={item.href}
-                    className={`flex items-center justify-between p-3 rounded-xl transition-all ${active ? "bg-blue-600 shadow-lg shadow-blue-900/50" : "hover:bg-blue-800/50 text-blue-100/70"}`}
+                    onClick={handleItemClick} // Menggunakan fungsi pengecekan lebar layar
+                    className={`flex items-center justify-between p-3 rounded-xl transition-all ${
+                      active
+                        ? "bg-blue-600 shadow-lg shadow-blue-900/50"
+                        : "hover:bg-blue-800/50 text-blue-100/70"
+                    }`}
                   >
                     <div className="flex items-center gap-3">
                       <item.icon size={18} />
@@ -121,18 +135,7 @@ export default function Sidebar({
         ))}
       </nav>
 
-      <div className="p-4 border-t border-blue-800">
-        <button
-          className="flex items-center gap-3 w-full p-3 text-blue-300 hover:text-white rounded-xl transition-all disabled:opacity-50"
-          onClick={logout}
-          disabled={isLoggingOut}
-        >
-          <LogOut size={18} />
-          <span className="font-semibold text-[13px]">
-            {isLoggingOut ? "Keluar..." : "Keluar"}
-          </span>
-        </button>
-      </div>
+   
     </aside>
   );
 }
