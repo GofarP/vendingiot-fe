@@ -1,12 +1,19 @@
-
 "use client";
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { LoginResponse } from "@/src/types/auth";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+
+import { LoginResponse } from "../types/auth";
 
 interface AuthContextType {
   user: LoginResponse | null;
   setUser: (user: LoginResponse | null) => void;
-  isLoading: boolean; 
+  isLoading: boolean;
+  hasPermission: (PermissionName: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,8 +43,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const hasPermission = (permissionName: string) => {
+    return user?.permissions?.includes(permissionName) ?? false;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser, isLoading, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );
@@ -46,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("Gunakan AuthProvider untuk membungkus Root Layout!");
+    throw new Error("diperlukan root layout untuk AuthProvider");
   }
   return context;
 };

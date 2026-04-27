@@ -10,6 +10,7 @@ export interface LoginResponse{
   email:string;
   fullName:string;
   roles:string[];
+  permissions:string[];
 }
 
 export interface ApiValidationError{
