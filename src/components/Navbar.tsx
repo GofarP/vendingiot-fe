@@ -11,7 +11,7 @@ interface NavbarProps {
 
 export default function Navbar({ isOpen, toggle }: NavbarProps) {
   const { user } = useAuth();
-  const { logout } = useLogout();
+  const { performLogout } = useLogout();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -103,7 +103,7 @@ export default function Navbar({ isOpen, toggle }: NavbarProps) {
               <div className="h-px bg-gray-100 my-1"></div>
 
               <button
-                onClick={logout}
+                onClick={performLogout}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-semibold"
               >
                 <LogOut size={16} />

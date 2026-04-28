@@ -1,28 +1,24 @@
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { authService } from "../../services/authServices";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@/src/context/AuthContext";
 
-export const useLogout=()=>{
-    const [isLoggingOut, setIsLoggingOut]=useState<boolean>(false);
-    const {setUser}=useAuth();
-    const router=useRouter();
+export const useLogout = () => {
+  const { logout } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    const logout=async():Promise<void>=>{
-        setIsLoggingOut(true);
-        try{
-            await authService.logout();
-        }
-        catch(error){
-           console.warn("Logout failed, cleaning local state")
-        }
-        finally{
-            setUser(null);
-            router.push("/login");
-            setIsLoggingOut(true);
-            localStorage.clear();
-        }
-    };
+  const performLogout = async () => {
+    setIsLoading(true);
+    setError(null);
 
-    return {logout, isLoggingOut};
-}
+    try {
+      await logout();
+    } catch (err: any) {
+      setError("Gagal keluar dari sistem. Silahkan coba lagi.");
+      console.error("Logout error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { performLogout, isLoading, error };
+};

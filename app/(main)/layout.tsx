@@ -1,51 +1,64 @@
-// src/app/(main)/layout.tsx
 "use client";
 import { useState, useEffect } from "react";
 import Sidebar from "@/src/components/Sidebar";
 import Navbar from "@/src/components/Navbar";
-import { AuthProvider } from "@/src/context/AuthContext"; // Pastikan path sesuai
+import { useAuth } from "@/src/context/AuthContext";
+import { useRouter } from "next/navigation";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  // 1. Inisialisasi state (default false agar tidak flicker di mobile)
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
-  // 2. Sinkronisasi dengan localStorage & Handle Responsive Initial State
   useEffect(() => {
-    const saved = localStorage.getItem("sidebar_open");
-    if (saved !== null) {
-      setIsOpen(saved === "true");
+    const isMobile = window.innerWidth < 1024;
+    if (isMobile) {
+      setIsOpen(false);
     } else {
-      // Jika belum ada di storage, Desktop (>=1024px) otomatis buka, Mobile tutup
-      setIsOpen(window.innerWidth >= 1024);
+      const saved = localStorage.getItem("sidebar_open");
+      setIsOpen(saved === "true" || saved === null);
     }
   }, []);
 
-  // 3. Fungsi Toggle yang rapi untuk dikirim ke Navbar
   const toggleSidebar = () => {
     const newState = !isOpen;
     setIsOpen(newState);
     localStorage.setItem("sidebar_open", newState.toString());
   };
 
-  return (
-    <AuthProvider>
-      <div className="flex min-h-screen bg-gray-50 text-gray-900">
-        {/* SIDEBAR: Posisinya fixed, z-50 */}
-        <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-
-        {/* KONTAINER UTAMA: Harus punya margin kiri jika sidebar buka (khusus Desktop) */}
-        <div 
-          className={`flex-1 flex flex-col transition-all duration-300 ease-in-out
-            ${isOpen ? "lg:ml-64" : "ml-0"}`} 
-        >
-          {/* NAVBAR: Menerima prop toggle untuk tombol hamburger */}
-          <Navbar isOpen={isOpen} toggle={toggleSidebar} />
-          
-          <main className="p-6">
-            {children}
-          </main>
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-500 font-medium animate-pulse">
+            Memverifikasi Sesi...
+          </p>
         </div>
       </div>
-    </AuthProvider>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
+
+      <div
+        className={`flex-1 flex flex-col transition-all duration-300 ease-in-out
+          ${isOpen ? "lg:ml-64" : "ml-0"}`}
+      >
+        <Navbar isOpen={isOpen} toggle={toggleSidebar} />
+
+        <main className="p-6">{children}</main>
+      </div>
+    </div>
   );
 }

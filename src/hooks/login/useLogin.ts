@@ -1,37 +1,45 @@
+// src/hooks/login/useLogin.ts
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { authService } from "../../services/authServices";
-import { LoginRequest, ApiValidationError } from "@/src/types/auth"; 
+import axios from "axios";
 import { useAuth } from "@/src/context/AuthContext";
 
 export const useLogin = () => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
-  
   const { setUser } = useAuth();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<any>({});
 
-  const performLogin = async (formData: LoginRequest): Promise<void> => {
+  const performLogin = async (credentials: any) => {
     setIsLoading(true);
     setError(null);
     setFieldErrors({});
 
     try {
-      const response = await authService.login(formData);
-      
-      setUser(response);
-      
-      router.push("/dashboard");
-    } catch (err: unknown) {
-      const errorData = err as ApiValidationError;
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+        credentials
+      );
 
-      if (errorData.errors) {
-        setFieldErrors(errorData.errors);
+      if (response.status === 200) {
+        const { token, refreshToken, ...userData } = response.data;
+
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("refreshToken", refreshToken);
+        sessionStorage.setItem("vending_user", JSON.stringify(userData));
+        setUser(userData);
+
+        router.push("/dashboard");
       }
-
-      setError(errorData.message || "An unexpected error occurred");
-      
+    } catch (err: any) {
+      if (err.response?.status === 400) {
+        setFieldErrors(err.response.data.errors || {});
+      } else if (err.response?.status === 401) {
+        setError(err.response.data.message || "Email atau password salah");
+      } else {
+        setError("Terjadi kesalahan pada server");
+      }
     } finally {
       setIsLoading(false);
     }

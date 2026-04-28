@@ -23,7 +23,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6">
-      <div className="w-full max-w-[420px] bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-10 border border-white">
+      <div className="w-full max-w-105 bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-10 border border-white">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg shadow-blue-200">
             <span className="text-white text-2xl font-black">V</span>
@@ -85,7 +85,7 @@ export default function LoginPage() {
             className="w-full py-4 mt-2 shadow-xl shadow-blue-100"
             isLoading={isLoading}
           >
-            Masuk Sekarang
+            {isLoading ? "Memproses..." : "Masuk Sekarang"}
           </Button>
         </form>
 
