@@ -1,6 +1,6 @@
-// src/app/layout.tsx
-import { AuthProvider } from "@/src/context/AuthContext"; // Sesuaikan path-nya
+import { AuthProvider } from "@/src/context/AuthContext";
 import "./globals.css";
+import { Toaster } from 'sonner';
 
 export default function RootLayout({
   children,
@@ -10,8 +10,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {/* AuthProvider dipasang di sini agar mencakup seluruh aplikasi */}
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <Toaster position="top-right" richColors />
+        </AuthProvider>
       </body>
     </html>
   );

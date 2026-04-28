@@ -9,9 +9,11 @@ import {
   LogOut,
   ChevronRight,
   X,
+  ShieldEllipsis,
 } from "lucide-react";
 import { useLogout } from "../hooks/logout/useLogout";
 import { useAuth } from "../context/AuthContext";
+import { permission } from "process";
 
 const menuGroups = [
   {
@@ -33,6 +35,12 @@ const menuGroups = [
         icon: Package,
         permission: "",
       },
+      {
+        name:"Permission Category",
+        href:"/permission-category",
+        icon:ShieldEllipsis,
+        permission:''
+      }
     ],
   },
   {

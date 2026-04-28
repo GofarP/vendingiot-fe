@@ -26,7 +26,7 @@ export function useDepartmentActions({
   const [serverErrors, setServerErrors] = useState<Record<string, string[]>>({});
 
   const resetForm = () => {
-    setForm({ name: "", description: "" });
+    setForm({id:0, name: "", description: "" });
     setServerErrors({});
     setSelectedDept(null);
   };
@@ -40,7 +40,7 @@ export function useDepartmentActions({
   const handleOpenEdit = (dept: Department) => {
     resetForm();
     setSelectedDept(dept);
-    setForm({ name: dept.name, description: dept.description });
+    setForm({ id:dept.id, name: dept.name, description: dept.description });
     setIsModalOpen(true);
   };
 
