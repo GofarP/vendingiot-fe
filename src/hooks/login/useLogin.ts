@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { authService } from "../services/authServices";
+import { authService } from "../../services/authServices";
 import { LoginRequest, ApiValidationError } from "@/src/types/auth"; 
 import { useAuth } from "@/src/context/AuthContext";
 

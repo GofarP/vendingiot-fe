@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { departmentService, Department } from "../services/departmentServices";
+import { departmentService, Department } from "../../services/departmentServices";
 
 interface ActionResponse {
   success: boolean;

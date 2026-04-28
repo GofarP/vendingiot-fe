@@ -10,7 +10,7 @@ import {
   ChevronRight,
   X,
 } from "lucide-react";
-import { useLogout } from "../hooks/useLogout";
+import { useLogout } from "../hooks/logout/useLogout";
 import { useAuth } from "../context/AuthContext";
 
 const menuGroups = [
@@ -74,13 +74,8 @@ export default function Sidebar({
   return (
     <aside
       className={`fixed left-0 top-0 h-screen w-64 bg-blue-900 text-white flex flex-col z-50 transition-transform duration-300 
-      ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-      lg:translate-x-0`} 
+      ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
     >
-      {/* CATATAN: lg:translate-x-0 memastikan sidebar 
-          selalu terlihat di desktop meskipun state isOpen = false 
-      */}
-
       <div className="p-6 flex items-center justify-between border-b border-blue-800">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center font-black italic">
@@ -92,7 +87,7 @@ export default function Sidebar({
         </div>
         <button
           onClick={() => setIsOpen(false)}
-          className="lg:hidden p-1 hover:bg-blue-800 rounded-md"
+          className="p-1 hover:bg-blue-800 rounded-md" // Hapus lg:hidden
         >
           <X size={20} />
         </button>
@@ -134,8 +129,6 @@ export default function Sidebar({
           </div>
         ))}
       </nav>
-
-   
     </aside>
   );
 }
