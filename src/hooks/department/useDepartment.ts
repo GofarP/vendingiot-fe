@@ -11,13 +11,13 @@ export function useDepartment() {
   const [error, setError] = useState<string | null>(null);
 
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [search, setSearch] = useState("");
   const [meta, setMeta] = useState({
     totalCount: 0,
     totalPages: 0,
     currentPage: 1,
-    pageSize: 5,
+    pageSize: 10,
   });
 
   const fetchDepartments = useCallback(async () => {

@@ -10,7 +10,7 @@ export function usePermissionCategory() {
     const [error, setError] = useState<string | null>(null);
 
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(5);
+    const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState("");
     const [meta, setMeta] = useState({
         totalCount: 0,
@@ -55,7 +55,7 @@ export function usePermissionCategory() {
         try {
             await permissionCategoryService.update(id, payload);
             await fetchPermissionCategory();
-            return {success:true, message:"Berhasil memperbarui data"};
+            return { success: true, message: "Berhasil memperbarui data" };
         } catch (err: any) {
             return {
                 success: false,
@@ -76,6 +76,24 @@ export function usePermissionCategory() {
                 message: err.response?.data?.message || "Gagal menghapus"
             };
         }
+    };
+
+
+    return {
+        permissionCategory,
+        loading,
+        error,
+        meta,
+        page,
+        setPage,
+        pageSize,
+        setPageSize,
+        search,
+        setSearch,
+        refresh: permissionCategory,
+        addPermissionCategory,
+        updateDepartment,
+        deletePermissionCategory,
     };
 
 }
