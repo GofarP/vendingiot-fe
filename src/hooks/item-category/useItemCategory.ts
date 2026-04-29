@@ -1,10 +1,10 @@
 "use client"
 import { useState, useEffect, useCallback } from "react"
-import { PermissionCategory, permissionCategoryService } from "@/src/services/permissionCategoryServices"
-import { ActionResponse } from "@/src/types/common";
+import { ItemCategory, itemCategoryService } from "@/src/services/itemCategoryServices"
+import { ActionResponse } from "@/src/types/common"
 
-export function usePermissionCategory() {
-    const [permissionCategory, setPermissionCategory] = useState<PermissionCategory[]>([]);
+export function useItemCategory() {
+    const [itemCategory, setItemCategory] = useState<ItemCategory[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -18,29 +18,29 @@ export function usePermissionCategory() {
         pageSize: 5,
     });
 
-    const fetchPermissionCategory = useCallback(async () => {
+    const fetchItemCategory = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await permissionCategoryService.getAll(page, pageSize, search);
-            setPermissionCategory(response.data);
+            const response = await itemCategoryService.getAll(page, pageSize, search);
+            setItemCategory(response.data);
             setMeta(response.pagination);
         } catch (err: any) {
-            setError(err.message || "Gagal mengambil data permission category");
+            setError(err.message || "Gagal mengambil data item category");
         } finally {
             setLoading(false);
         }
     }, [page, pageSize, search]);
 
     useEffect(() => {
-        fetchPermissionCategory();
-    }, [fetchPermissionCategory]);
+        fetchItemCategory();
+    }, [fetchItemCategory]);
 
-    const addPermissionCategory = async (payload: PermissionCategory): Promise<ActionResponse> => {
+    const addItemCategory = async (payload: ItemCategory): Promise<ActionResponse> => {
         try {
-            await permissionCategoryService.create(payload);
-            await fetchPermissionCategory();
-            return { success: true, message: "Berhasil menambah permission category" }
+            await itemCategoryService.create(payload);
+            await fetchItemCategory();
+            return { success: true, message: "Berhasil menambah item category" }
         } catch (err: any) {
             return {
                 success: false,
@@ -50,10 +50,10 @@ export function usePermissionCategory() {
         }
     }
 
-    const updatePermissionCategory = async (id: number, payload: PermissionCategory): Promise<ActionResponse> => {
+    const updateItemCategory = async (id: number, payload: ItemCategory): Promise<ActionResponse> => {
         try {
-            await permissionCategoryService.update(id, payload);
-            await fetchPermissionCategory();
+            await itemCategoryService.update(id, payload);
+            await fetchItemCategory();
             return { success: true, message: "Berhasil memperbarui data" };
         } catch (err: any) {
             return {
@@ -64,10 +64,11 @@ export function usePermissionCategory() {
         }
     }
 
-    const deletePermissionCategory = async (id: number): Promise<ActionResponse> => {
+
+    const deleteItemCategory = async (id: number): Promise<ActionResponse> => {
         try {
-            await permissionCategoryService.delete(id);
-            await fetchPermissionCategory();
+            await itemCategoryService.delete(id);
+            await fetchItemCategory();
             return { success: true, message: "Berhasil menghapus data" };
         } catch (err: any) {
             return {
@@ -77,22 +78,20 @@ export function usePermissionCategory() {
         }
     };
 
-
     return {
-        permissionCategory,
+        itemCategory,
         loading,
         error,
         meta,
         page,
         setPage,
-        pageSize,
         setPageSize,
         search,
         setSearch,
-        refresh: permissionCategory,
-        addPermissionCategory,
-        updatePermissionCategory,
-        deletePermissionCategory,
-    };
+        refresh: itemCategory,
+        addItemCategory,
+        updateItemCategory,
+        deleteItemCategory,
+    }
 
 }

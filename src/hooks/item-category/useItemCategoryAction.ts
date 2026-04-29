@@ -1,21 +1,21 @@
 "use client"
 import { useState } from "react";
 import { toast } from "sonner";
-import { PermissionCategory } from "@/src/services/permissionCategoryServices";
+import { ItemCategory } from "@/src/services/itemCategoryServices";
 import { ActionResponse } from "@/src/types/common";
 
-interface UsePermissionCategoryActionProps {
-    addPermissionCategory: (payload: PermissionCategory) => Promise<ActionResponse>;
-    updatePermissionCategory: (id: number, payload: PermissionCategory) => Promise<ActionResponse>;
+interface UseItemCategoryActionProps {
+    addItemCategory: (payload: ItemCategory) => Promise<ActionResponse>;
+    updateItemCategory: (id: number, payload: ItemCategory) => Promise<ActionResponse>;
 }
 
-export function UsePermissionCategoryActions({
-    addPermissionCategory,
-    updatePermissionCategory
-}: UsePermissionCategoryActionProps) {
+export function UseItemCategoryActions({
+    addItemCategory,
+    updateItemCategory
+}: UseItemCategoryActionProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedPermissionCategory, setSelectedPermissionCategory] = useState<PermissionCategory | null>(null);
-    const [form, setForm] = useState<PermissionCategory>({ id: 0, name: "", description: "" });
+    const [selectedItemCategory, setSelectedItemCategory] = useState<ItemCategory | null>(null);
+    const [form, setForm] = useState<ItemCategory>({ id: 0, name: "", description: "" });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [serverErrors, setServerErrors] = useState<Record<string, string[]>>({});
 
@@ -23,7 +23,7 @@ export function UsePermissionCategoryActions({
     const resetForm = () => {
         setForm({ id: 0, name: "", description: "" });
         setServerErrors({});
-        setSelectedPermissionCategory(null);
+        setSelectedItemCategory(null);
     };
 
     const handleOpenAdd = () => {
@@ -31,10 +31,10 @@ export function UsePermissionCategoryActions({
         setIsModalOpen(true);
     };
 
-    const handleOpenEdit = (permissionCategory: PermissionCategory) => {
+    const handleOpenEdit = (itemCategory: ItemCategory) => {
         resetForm();
-        setSelectedPermissionCategory(permissionCategory);
-        setForm({ id: permissionCategory.id, name: permissionCategory.name, description: permissionCategory.description });
+        setSelectedItemCategory(itemCategory);
+        setForm({ id: itemCategory.id, name: itemCategory.name, description: itemCategory.description });
         setIsModalOpen(true);
     };
 
@@ -45,15 +45,15 @@ export function UsePermissionCategoryActions({
         setIsSubmitting(true);
         setServerErrors({});
 
-        const action = selectedPermissionCategory?.id
-            ? updatePermissionCategory(selectedPermissionCategory.id, form)
-            : addPermissionCategory(form);
+        const action = selectedItemCategory?.id
+            ? updateItemCategory(selectedItemCategory.id, form)
+            : addItemCategory(form);
 
         const res = await action;
         setIsSubmitting(false);
 
         if (res.success) {
-            toast.success(selectedPermissionCategory
+            toast.success(selectedItemCategory
                 ? `Berhasil memperbarui data ${form.name}`
                 : `Berhasil menambahkan data ${form.name}`
             );
@@ -73,7 +73,7 @@ export function UsePermissionCategoryActions({
     return{
         form,
         isModalOpen,
-        selectedPermissionCategory,
+        selectedItemCategory,
         isSubmitting,
         serverErrors,
         setForm,

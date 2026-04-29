@@ -37,8 +37,14 @@ const menuGroups = [
       },
       {
         name:"Permission Category",
-        href:"/permission-category",
+        href:"permission-category",
         icon:ShieldEllipsis,
+        permission:'',
+      },
+      {
+        name:"Item Category",
+        href:"/item-category",
+        icon:Package,
         permission:''
       }
     ],

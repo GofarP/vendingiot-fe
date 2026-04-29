@@ -6,13 +6,14 @@ import DataTable from "@/src/components/DataTable";
 import Input from "@/src/components/Input";
 import Button from "@/src/components/Button";
 import FormShell from "@/src/components/FormShell";
-import { usePermissionCategory } from "@/src/hooks/permission-category/usePermissionCategory";
-import { UsePermissionCategoryActions } from "@/src/hooks/permission-category/usePermissionCategoryAction";
+import { useItemCategory } from "@/src/hooks/item-category/useItemCategory";
+import { UseItemCategoryActions } from "@/src/hooks/item-category/useItemCategoryAction";
+import AsyncSelect from "@/src/components/AsyncSelect";
 
 
-export default function PermissionCategoryPage() {
+export default function ItemCategoryPage() {
     const {
-        permissionCategory,
+        itemCategory,
         loading,
         error,
         meta,
@@ -20,29 +21,29 @@ export default function PermissionCategoryPage() {
         setPageSize,
         setSearch,
         search,
-        addPermissionCategory,
-        updatePermissionCategory,
-        deletePermissionCategory,
-    } = usePermissionCategory()
+        addItemCategory,
+        updateItemCategory,
+        deleteItemCategory,
+    } = useItemCategory()
 
     const {
         form,
         setForm,
         isModalOpen,
         setIsModalOpen,
-        selectedPermissionCategory,
+        selectedItemCategory,
         isSubmitting,
         serverErrors,
         setServerErrors,
         handleOpenAdd,
         handleOpenEdit,
         handleSave,
-    } = UsePermissionCategoryActions({ addPermissionCategory, updatePermissionCategory });
+    } = UseItemCategoryActions({ addItemCategory, updateItemCategory });
 
 
     const handleDelete = async (id: number) => {
         if (confirm("Apakah Anda yakin ingin menghapus category ini?")) {
-            const res = await deletePermissionCategory(id);
+            const res = await deleteItemCategory(id);
             if (res.success) {
                 toast.success("Data category berhasil dihapus.");
             } else {
@@ -79,7 +80,7 @@ export default function PermissionCategoryPage() {
             )}
 
             <DataTable
-                data={permissionCategory}
+                data={itemCategory}
                 isLoading={loading}
                 meta={meta}
                 onPageChange={setPage}
@@ -166,14 +167,14 @@ export default function PermissionCategoryPage() {
             <FormShell
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title={selectedPermissionCategory ? "Edit Permission Category" : "Tambah Permission Category"}
+                title={selectedItemCategory ? "Edit Item Category" : "Tambah Item Category"}
 
             >
 
                 <form onSubmit={handleSave} className="space-y-8 py-2">
                     <Input
                         label="Nama Permission Category"
-                        placeholder="Contoh: User,Machine..."
+                        placeholder="Contoh: food, drink..."
                         required
                         value={form.name}
                         error={serverErrors.Name?.[0]}
@@ -186,7 +187,7 @@ export default function PermissionCategoryPage() {
 
                     <Input
                         label="Deskripsi"
-                        placeholder="Jelaskan tentang permission category..."
+                        placeholder="Jelaskan tentang item category..."
                         value={form.description}
                         error={serverErrors.Description?.[0]}
                         onChange={(e) => {
@@ -194,6 +195,15 @@ export default function PermissionCategoryPage() {
                             if (serverErrors.Description)
                                 setServerErrors({ ...serverErrors, Description: [] });
                         }}
+                    />
+
+                    <AsyncSelect
+                        label="Item Category"
+                        placeholder="Pilih kategori barang..."
+                        apiEndpoint="/api/itemcategory/"
+                        value={form.description}
+                        onChange={(val: string | number) => setForm({ ...form, description: String(val) })}
+                        error={serverErrors.Description?.[0]}
                     />
 
                     <div className="pt-6 flex gap-4">
