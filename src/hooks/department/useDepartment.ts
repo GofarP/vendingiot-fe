@@ -1,12 +1,9 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { departmentService, Department } from "../../services/departmentServices";
+import { ActionResponse } from "@/src/types/common";
 
-interface ActionResponse {
-  success: boolean;
-  message: string;
-  errors?: Record<string, string[]>
-}
+
 
 export function useDepartment() {
   const [department, setDepartment] = useState<Department[]>([]);

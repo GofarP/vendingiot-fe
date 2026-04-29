@@ -1,9 +1,10 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import Input from "./Input";
 import Pagination from "./Pagination";
 
+import { useDebounce } from "../hooks/debounce/useDebounce";
 interface DataTableProps<T> {
   data: T[];
   columns: {
@@ -13,7 +14,6 @@ interface DataTableProps<T> {
   renderMobileCard: (item: T) => React.ReactNode;
   isLoading?: boolean;
 
-  // Metadata dari API .NET
   meta: {
     totalCount: number;
     totalPages: number;
@@ -21,7 +21,6 @@ interface DataTableProps<T> {
     pageSize: number;
   };
 
-  // Callback untuk Hook useDepartment
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onSearchChange: (search: string) => void;
@@ -39,13 +38,33 @@ export default function DataTable<T>({
   onSearchChange,
   searchValue,
 }: DataTableProps<T>) {
+  // --- LOGIC DEBOUNCE START ---
 
-  const startItem = meta.totalCount === 0 ? 0 : (meta.currentPage - 1) * meta.pageSize + 1;
+  // 1. Local state untuk menampung ketikan user secara real-time (agar UI lancar)
+  const [searchTerm, setSearchTerm] = useState(searchValue);
+
+  // 2. Gunakan hook debounce (menunggu 500ms setelah berhenti mengetik)
+  const debouncedSearchValue = useDebounce(searchTerm, 500);
+
+  // 3. Sinkronisasi local state jika searchValue dari props berubah (misal: di-reset dari luar)
+  useEffect(() => {
+    setSearchTerm(searchValue);
+  }, [searchValue]);
+
+  // 4. Trigger callback onSearchChange HANYA saat debounced value berubah
+  useEffect(() => {
+    onSearchChange(debouncedSearchValue);
+  }, [debouncedSearchValue, onSearchChange]);
+
+  // --- LOGIC DEBOUNCE END ---
+
+  const startItem =
+    meta.totalCount === 0 ? 0 : (meta.currentPage - 1) * meta.pageSize + 1;
   const endItem = Math.min(meta.currentPage * meta.pageSize, meta.totalCount);
 
   return (
     <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
-
+      {/* Header: Page Size & Search */}
       <div className="p-6 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3 w-full md:w-auto">
           <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
@@ -69,13 +88,15 @@ export default function DataTable<T>({
 
         <Input
           placeholder="Cari data..."
-          value={searchValue}
-          onChange={(e) => onSearchChange(e.target.value)}
+          // Pakai searchTerm (local) bukan searchValue (prop) agar ngetik terasa enteng
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           leftIcon={<Search size={16} />}
           className="w-full md:w-80"
         />
       </div>
 
+      {/* Desktop View */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead className="bg-gray-50/50 text-[10px] uppercase tracking-widest font-black text-gray-400">
@@ -112,7 +133,10 @@ export default function DataTable<T>({
                       key={i}
                       className={`px-6 py-5 text-[13px] text-gray-600 font-medium ${i === 0 ? "pl-8" : ""} ${i === columns.length - 1 ? "pr-8" : ""}`}
                     >
-                      {col.render(item, (meta.currentPage - 1) * meta.pageSize + index)}
+                      {col.render(
+                        item,
+                        (meta.currentPage - 1) * meta.pageSize + index,
+                      )}
                     </td>
                   ))}
                 </tr>
@@ -131,6 +155,7 @@ export default function DataTable<T>({
         </table>
       </div>
 
+      {/* Mobile View */}
       <div className="md:hidden p-4 space-y-4">
         {isLoading ? (
           <div className="h-32 bg-gray-50 animate-pulse rounded-[2rem]" />
@@ -145,11 +170,12 @@ export default function DataTable<T>({
         )}
       </div>
 
+      {/* Footer: Pagination */}
       <div className="px-6 py-5 bg-gray-50/50 border-t border-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
           Showing <span className="text-blue-600">{startItem}</span> -{" "}
-          <span className="text-blue-600">{endItem}</span> of{" "}
-          {meta.totalCount} Entries
+          <span className="text-blue-600">{endItem}</span> of {meta.totalCount}{" "}
+          Entries
         </p>
 
         <Pagination

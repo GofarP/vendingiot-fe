@@ -7,7 +7,7 @@ export interface Department {
 }
 
 export const departmentService = {
-  getAll: async (page: number = 1, pageSize: number = 5, search: string = "") => {
+  getAll: async (page: number = 1, pageSize: number = 10, search: string = "") => {
     const response = await axiosInstance.get("/api/department", {
       params: { 
         page, 

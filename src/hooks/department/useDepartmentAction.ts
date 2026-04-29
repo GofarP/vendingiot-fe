@@ -2,23 +2,20 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Department } from "@/src/services/departmentServices";
+import { ActionResponse } from "@/src/types/common";
 
-interface ActionResponse {
-  success: boolean;
-  message: string;
-  errors?: Record<string, string[]>;
-}
+
 
 interface UseDepartmentActionsProps {
   addDepartment: (payload: Department) => Promise<ActionResponse>;
   updateDepartment: (id: number, payload: Department) => Promise<ActionResponse>;
 }
 
-export function useDepartmentActions({ 
-  addDepartment, 
-  updateDepartment 
+export function useDepartmentActions({
+  addDepartment,
+  updateDepartment
 }: UseDepartmentActionsProps) {
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDept, setSelectedDept] = useState<Department | null>(null);
   const [form, setForm] = useState<Department>({ name: "", description: "" });
@@ -26,7 +23,7 @@ export function useDepartmentActions({
   const [serverErrors, setServerErrors] = useState<Record<string, string[]>>({});
 
   const resetForm = () => {
-    setForm({id:0, name: "", description: "" });
+    setForm({ id: 0, name: "", description: "" });
     setServerErrors({});
     setSelectedDept(null);
   };
@@ -40,13 +37,13 @@ export function useDepartmentActions({
   const handleOpenEdit = (dept: Department) => {
     resetForm();
     setSelectedDept(dept);
-    setForm({ id:dept.id, name: dept.name, description: dept.description });
+    setForm({ id: dept.id, name: dept.name, description: dept.description });
     setIsModalOpen(true);
   };
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    
+
     setIsSubmitting(true);
     setServerErrors({});
 
@@ -58,12 +55,11 @@ export function useDepartmentActions({
     setIsSubmitting(false);
 
     if (res.success) {
-      // Notifikasi Sukses
-      toast.success(selectedDept 
-        ? `Berhasil memperbarui data ${form.name}` 
+      toast.success(selectedDept
+        ? `Berhasil memperbarui data ${form.name}`
         : `Berhasil menambahkan data ${form.name}`
       );
-      
+
       setIsModalOpen(false);
       resetForm();
     } else {
@@ -76,20 +72,15 @@ export function useDepartmentActions({
     }
   };
 
-  
-
   return {
-    // States
     form,
     isModalOpen,
     selectedDept,
     isSubmitting,
     serverErrors,
-    
     setForm,
     setIsModalOpen,
     setServerErrors,
-    
     handleOpenAdd,
     handleOpenEdit,
     handleSave,
