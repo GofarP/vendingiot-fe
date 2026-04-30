@@ -10,10 +10,11 @@ import {
   ChevronRight,
   X,
   ShieldEllipsis,
+  BoxSelect,
 } from "lucide-react";
 import { useLogout } from "../hooks/logout/useLogout";
 import { useAuth } from "../context/AuthContext";
-import { permission } from "process";
+import { permission, title } from "process";
 
 const menuGroups = [
   {
@@ -36,18 +37,22 @@ const menuGroups = [
         permission: "",
       },
       {
-        name:"Permission Category",
-        href:"permission-category",
-        icon:ShieldEllipsis,
-        permission:'',
+        name: "Permission Category",
+        href: "permission-category",
+        icon: ShieldEllipsis,
+        permission: "",
       },
       {
-        name:"Item Category",
-        href:"/item-category",
-        icon:Package,
-        permission:''
-      }
+        name: "Item Category",
+        href: "/item-category",
+        icon: Package,
+        permission: "",
+      },
     ],
+  },
+  {
+    title: "Item",
+    items: [{ name: "Item", href: "/item", icon: BoxSelect, permission: "" }],
   },
   {
     title: "Sistem",
