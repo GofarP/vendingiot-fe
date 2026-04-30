@@ -11,6 +11,8 @@ import {
   X,
   ShieldEllipsis,
   BoxSelect,
+  Boxes,
+  Refrigerator,
 } from "lucide-react";
 import { useLogout } from "../hooks/logout/useLogout";
 import { useAuth } from "../context/AuthContext";
@@ -53,6 +55,17 @@ const menuGroups = [
   {
     title: "Item",
     items: [{ name: "Item", href: "/item", icon: BoxSelect, permission: "" }],
+  },
+  {
+    title: "Vending Machine",
+    items: [
+      {
+        name: "Vending Machine",
+        href: "/vending-machine",
+        icon: Refrigerator,
+        permission:'',
+      }
+    ]
   },
   {
     title: "Sistem",
@@ -126,11 +139,10 @@ export default function Sidebar({
                     key={item.name}
                     href={item.href}
                     onClick={handleItemClick} // Menggunakan fungsi pengecekan lebar layar
-                    className={`flex items-center justify-between p-3 rounded-xl transition-all ${
-                      active
-                        ? "bg-blue-600 shadow-lg shadow-blue-900/50"
-                        : "hover:bg-blue-800/50 text-blue-100/70"
-                    }`}
+                    className={`flex items-center justify-between p-3 rounded-xl transition-all ${active
+                      ? "bg-blue-600 shadow-lg shadow-blue-900/50"
+                      : "hover:bg-blue-800/50 text-blue-100/70"
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <item.icon size={18} />

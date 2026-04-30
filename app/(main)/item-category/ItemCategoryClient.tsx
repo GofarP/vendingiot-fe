@@ -95,7 +95,7 @@ export default function ItemCategoryPage() {
             ),
           },
           {
-            label: "Permission Category Name",
+            label: "Item Category Name",
             render: (item) => (
               <div className="flex items-center gap-3">
                 <b className="text-gray-900 tracking-tight">{item.name}</b>
@@ -170,7 +170,7 @@ export default function ItemCategoryPage() {
       >
         <form onSubmit={handleSave} className="space-y-8 py-2">
           <Input
-            label="Nama Permission Category"
+            label="Nama Item Category"
             placeholder="Contoh: food, drink..."
             required
             value={form.name}

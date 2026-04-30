@@ -1,75 +1,103 @@
-"use client";
-import React from "react";
+import React, { ReactNode, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMediaQuery } from "../hooks/useMediaQuery";
 
 interface FormShellProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  children: React.ReactNode;
+  subtitle?: string;
+  children: ReactNode;
+  footer?: ReactNode;
 }
 
 export default function FormShell({
   isOpen,
   onClose,
   title,
+  subtitle,
   children,
+  footer,
 }: FormShellProps) {
-  const isDesktop = useMediaQuery("(min-width: 1024px)");
+
+  // Kunci scroll body saat modal terbuka
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[60] flex items-end lg:items-center justify-center p-0 lg:p-4">
+        <div className="fixed inset-0 z-[999] flex items-end sm:items-center justify-center">
+          {/* Backdrop (Overlay) */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
           />
 
+          {/* Main Container (The Sheet) */}
           <motion.div
-            drag={isDesktop ? false : "y"}
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.5 }}
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+
+            // --- LOGIKA DRAG ---
+            drag="y"
+            dragConstraints={{ top: 0 }} // Tidak bisa ditarik ke atas, hanya bawah
+            dragElastic={0.4}
             onDragEnd={(_, info) => {
+              // Jika ditarik ke bawah lebih dari 100px, jalankan onClose
               if (info.offset.y > 100) {
                 onClose();
               }
             }}
-            initial={isDesktop ? { opacity: 0, scale: 0.95 } : { y: "100%" }}
-            animate={isDesktop ? { opacity: 1, scale: 1 } : { y: 0 }}
-            exit={isDesktop ? { opacity: 0, scale: 0.95 } : { y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className={`
-              relative bg-white w-full z-10 shadow-2xl flex flex-col touch-none
-              ${
-                isDesktop
-                  ? "max-w-lg rounded-[2.5rem] overflow-hidden"
-                  : "rounded-t-[2.5rem] max-h-[95vh]"
-              }
-            `}
-          >
-            {!isDesktop && (
-              <div className="w-full flex justify-center p-4 cursor-grab active:cursor-grabbing">
-                <div className="w-12 h-1.5 bg-gray-200 rounded-full" />
-              </div>
-            )}
+            // -------------------
 
-            <div
-              className={`px-8 flex items-center justify-center border-b border-gray-50 
-                ${isDesktop ? "pt-12 pb-8" : "pb-6"}`}
-            >
-              <h3 className="text-xl font-black uppercase tracking-tighter text-blue-900 text-center leading-none">
-                {title.split(" ")[0]}{" "}
-                <span className="text-blue-600">
-                  {title.split(" ").slice(1).join(" ")}
-                </span>
-              </h3>
+            className="relative w-full max-w-xl bg-white 
+              rounded-t-[3.5rem] sm:rounded-[3.5rem] 
+              shadow-2xl overflow-hidden touch-none sm:m-4"
+          >
+            {/* Drag Handle Bar (Visual Cue) */}
+            <div className="flex justify-center pt-6 pb-2 cursor-grab active:cursor-grabbing">
+              <div className="w-16 h-1.5 bg-gray-200 rounded-full" />
             </div>
 
-            <div className="px-8 py-6 overflow-y-auto">{children}</div>
+            {/* Header */}
+            <div className="px-10 pt-4 pb-6 text-center select-none">
+              <h2 className="text-lg sm:text-2xl font-black tracking-tight text-center leading-tight">
+                <span className="text-blue-600 uppercase italic">
+                  {title.split(" ")[0]}
+                </span>
+                {" "}
+                <span className="text-blue-900 uppercase italic">
+                  {title.split(" ").slice(1).join(" ")}
+                </span>
+              </h2>
+              {subtitle && (
+                <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase tracking-[0.2em]">
+                  {subtitle}
+                </p>
+              )}
+            </div>
+
+            {/* Content Body */}
+            <div className="px-10 py-2 max-h-[65vh] overflow-y-auto">
+              {children}
+            </div>
+
+            {/* Footer / Buttons (Jika ada) */}
+            {footer && (
+              <div className="px-10 pb-12 pt-6 flex gap-4">
+                {footer}
+              </div>
+            )}
           </motion.div>
         </div>
       )}

@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import ItemPage from "./ItemPage";
+import ItemPage from "./ItemClient";
 export const metadata: Metadata = {
   title: "Item",
 };
