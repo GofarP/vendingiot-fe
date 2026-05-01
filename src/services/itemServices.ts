@@ -22,7 +22,7 @@ export const itemService = {
     },
 
     getById: async (id: number) => {
-        const response = await axiosInstance.get<Item>(`/api/itemcategory/${id}`);
+        const response = await axiosInstance.get<Item>(`/api/item/${id}`);
         return response.data;
     },
 

@@ -13,6 +13,7 @@ import {
   BoxSelect,
   Boxes,
   Refrigerator,
+  PlusCircle,
 } from "lucide-react";
 import { useLogout } from "../hooks/logout/useLogout";
 import { useAuth } from "../context/AuthContext";
@@ -63,6 +64,12 @@ const menuGroups = [
         name: "Vending Machine",
         href: "/vending-machine",
         icon: Refrigerator,
+        permission:'',
+      },
+      {
+        name:"Vending Item",
+        href:'/vending-item',
+        icon:PlusCircle,
         permission:'',
       }
     ]
