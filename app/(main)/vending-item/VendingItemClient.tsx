@@ -1,5 +1,5 @@
 "use client";
-import { Plus, Trash2, AlertCircle } from "lucide-react";
+import { Plus, Trash2, AlertCircle, Eye, LucideEye } from "lucide-react";
 import { toast } from "sonner";
 import DataTable from "@/src/components/DataTable";
 import Button from "@/src/components/Button";
@@ -9,6 +9,7 @@ import AsyncSelect from "@/src/components/AsyncSelect";
 
 import { useVendingItem } from "@/src/hooks/vending-item/useVendingItem";
 import { useVendingItemAction } from "@/src/hooks/vending-item/useVendingItemAction";
+import { VendingItem } from "@/src/services/vendingItemServices";
 
 export default function VendingItemClient() {
   const {
@@ -16,16 +17,18 @@ export default function VendingItemClient() {
     loading,
     error,
     meta,
+    setId,
     setPage,
     setPageSize,
     setSearch,
     search,
     removeItemFromMachine,
     assignItemToMachine,
+    fetchItemByMachine,
     restock,
   } = useVendingItem();
 
-  // 2. Ambil state form dari action hook (lempar fungsi mutasi ke dalamnya)
+
   const {
     form,
     setForm,
@@ -67,7 +70,7 @@ export default function VendingItemClient() {
           </p>
         </div>
         <Button
-          onClick={() => handleOpenAdd(0)} 
+          onClick={() => handleOpenAdd(0)}
           icon={<Plus size={20} />}
           className="w-full md:w-auto"
         >
@@ -106,80 +109,83 @@ export default function VendingItemClient() {
             render: (item: any) => (
               <div className="flex flex-col">
                 <b className="text-gray-900 tracking-tight">
-                  {item.item?.name || `Item ID: #${item.itemId}`}
+                  {item.name}
                 </b>
                 <span className="text-[10px] text-blue-500 font-bold uppercase tracking-tighter">
-                  {item.vendingMachine?.name || `Machine ID: #${item.vendingMachineId}`}
+                  {item.vendingMachine?.name}
                 </span>
               </div>
             ),
           },
           {
-            label: "Kapasitas Maksimal",
+            label: "Ringkasan Inventaris",
             render: (item: any) => (
-              <span className="text-gray-700 font-bold text-sm">
-                {item.capacity} PCS
-              </span>
-            ),
-          },
-          {
-            label: "Stok Tersedia",
-            render: (item: any) => (
-              <div className="flex items-center gap-2">
-                <span
-                  className={`px-2 py-1 rounded-lg text-[10px] font-black ${
-                    item.quantity > (item.capacity * 0.2) // Merah jika stok di bawah 20% kapasitas
-                      ? "bg-green-100 text-green-600"
-                      : "bg-red-100 text-red-600"
-                  }`}
-                >
-                  {item.quantity} PCS
-                </span>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-blue-600 font-black text-xs uppercase tracking-tighter">
+                    {item.totalItemTypes} Tipe Barang
+                  </span>
+                </div>
+                <div className="text-[11px] text-gray-500 font-medium">
+                  {item.totalStock} Total Stok • {item.totalCategories} Kategori
+                </div>
               </div>
             ),
           },
+
           {
             label: "Actions",
-            render: (item: any) => (
-              <div className="flex gap-1 pr-4">
-                <button
-                  onClick={() => item.id && handleDelete(item.id)}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                  title="Hapus dari mesin"
-                >
-                  <Trash2 size={15} />
-                </button>
-              </div>
-            ),
-          },
+            render: (item: VendingItem) => {
+              return (
+                <div className="flex gap-1 pr-4">
+                  <button
+                    onClick={() => setId(item.id ?? 0)}
+                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
+                    title="Lihat isi mesin"
+                  >
+                    <LucideEye size={15} />
+                  </button>
+                  <button
+                    onClick={() => item.id && handleDelete(item.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                    title="Hapus mesin"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              )
+
+            }
+          }
         ]}
-        /* TAMPILAN MOBILE CARD YANG KELUPAAN TADI */
         renderMobileCard={(item: any) => (
-          <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm space-y-4">
+          <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm space-y-4">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
                 <h4 className="font-black text-gray-900 uppercase italic tracking-tight leading-none">
-                  {item.item?.name || `Item ID: #${item.itemId}`}
+                  {item.machineCode}
                 </h4>
                 <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase">
-                  {item.vendingMachine?.name || `Machine ID: #${item.vendingMachineId}`}
+                  {item.name}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl">
               <span className="text-xs font-bold text-gray-400 uppercase">
-                Stok / Kapasitas
+                Ringkasan Item
               </span>
-              <span 
-                className={`text-sm font-black ${
-                  item.quantity > (item.capacity * 0.2)
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {item.quantity} / {item.capacity} PCS
-              </span>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-blue-600 font-black text-xs uppercase tracking-tighter">
+                    {item.totalItemTypes} Tipe Barang
+                  </span>
+                </div>
+                <div className="text-[11px] text-gray-500 font-medium">
+                  {item.totalStock} Total Stok • {item.totalCategories} Kategori
+                </div>
+              </div>
+
             </div>
 
             <div className="flex gap-2 pt-2">
@@ -259,7 +265,6 @@ export default function VendingItemClient() {
             />
           </div>
 
-          {/* TOMBOL */}
           <div className="pt-6 flex gap-4 mt-auto">
             <button
               type="button"

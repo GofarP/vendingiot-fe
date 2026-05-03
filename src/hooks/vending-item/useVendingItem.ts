@@ -34,11 +34,6 @@ export function useVendingItem() {
         }
     }, [page, pageSize, search]);
 
-    useEffect(() => {
-        fetchVendingMachineWithStock();
-    }, [fetchVendingMachineWithStock]);
-
-
     const fetchItemByMachine = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -46,16 +41,23 @@ export function useVendingItem() {
             const response = await vendingItemService.getItemsByMachine(page, pageSize, search, id);
             setVendingItem(response.data);
             setMeta(response.pagination);
+            console.log(response.data);
         } catch (err: any) {
             setError(err.message || "Gagal mengambil data vending Item");
         } finally {
             setLoading(false);
         }
-    }, [page, pageSize, search]);
+    }, [page, pageSize, search,id]);
 
     useEffect(() => {
-        fetchItemByMachine();
-    }, [fetchItemByMachine]);
+        if (id > 0) {
+            fetchItemByMachine();
+        } else {
+            fetchVendingMachineWithStock();
+        }
+    }, [id, fetchVendingMachineWithStock, fetchItemByMachine])
+
+
 
     const assignItemToMachine = async (payload: VendingItem): Promise<ActionResponse> => {
         try {
