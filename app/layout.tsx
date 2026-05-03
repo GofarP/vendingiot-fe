@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/src/context/AuthContext";
+import AuthGuard from "@/src/components/AuthGuard";
 import "./globals.css";
 import { Toaster } from 'sonner';
 
@@ -11,8 +12,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          {children}
-          <Toaster position="top-right" richColors />
+          <AuthGuard>
+            {children}
+            <Toaster position="top-right" richColors />
+          </AuthGuard>
         </AuthProvider>
       </body>
     </html>

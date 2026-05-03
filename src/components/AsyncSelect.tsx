@@ -16,6 +16,7 @@ interface AsyncSelectProps {
   value: string | number;
   onChange: (value: string | number) => void;
   error?: string;
+  required?: boolean; // Tambahan prop required
 }
 
 export default function AsyncSelect({
@@ -25,6 +26,7 @@ export default function AsyncSelect({
   value,
   onChange,
   error,
+  required = false,
 }: AsyncSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -35,6 +37,7 @@ export default function AsyncSelect({
   const debouncedSearch = useDebounce(searchTerm, 500);
   const dropDownRef = useRef<HTMLDivElement>(null);
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
   useEffect(() => {
     const fetchData = async () => {
       if (!isOpen || debouncedSearch.trim().length === 0) {
@@ -92,20 +95,27 @@ export default function AsyncSelect({
   };
 
   return (
-    <div className="relative w-full space-y-2" ref={dropDownRef}>
+    <div className="relative w-full space-y-1.5" ref={dropDownRef}>
+      {/* LABEL DIUPDATE SAMA SEPERTI INPUT */}
       {label && (
-        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
-          {label}
+        <label className="text-sm font-bold text-gray-800 flex items-center gap-1">
+          {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
 
-      {/* Tombol Utama / Input Display */}
+      {/* Tombol Utama / Input Display DIUPDATE SAMA SEPERTI INPUT */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full bg-gray-50 border-2 ${isOpen ? "border-blue-500" : "border-transparent"} ${error ? "border-red-500" : ""} rounded-2xl px-5 py-4 flex items-center justify-between cursor-pointer transition-all hover:bg-gray-100/80`}
+        className={`w-full bg-white rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer transition-all border ${
+          error 
+            ? "border-red-500 focus:border-red-500" 
+            : isOpen 
+              ? "border-blue-500" 
+              : "border-gray-300 hover:border-gray-400"
+        }`}
       >
         <span
-          className={`text-sm font-bold ${!selectedLabel ? "text-gray-400" : "text-gray-700"}`}
+          className={`text-sm ${!selectedLabel ? "text-gray-400" : "text-gray-800"}`}
         >
           {selectedLabel || placeholder}
         </span>
@@ -117,13 +127,13 @@ export default function AsyncSelect({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-[100] w-full mt-2 bg-white rounded-3xl border border-gray-100 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute z-[100] w-full mt-1.5 bg-white rounded-xl border border-gray-200 shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Search Box inside Dropdown */}
-          <div className="p-4 border-b border-gray-50 flex items-center gap-3">
+          <div className="p-3 border-b border-gray-100 flex items-center gap-3">
             <Search size={16} className="text-gray-400" />
             <input
               autoFocus
-              className="w-full text-sm font-bold outline-none text-gray-700 placeholder:text-gray-300"
+              className="w-full text-sm outline-none text-gray-800 placeholder:text-gray-400"
               placeholder="Ketik untuk mencari..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -134,19 +144,19 @@ export default function AsyncSelect({
           </div>
 
           {/* List Options */}
-          <ul className="max-h-60 overflow-y-auto p-2">
+          <ul className="max-h-60 overflow-y-auto p-1.5">
             {options.length > 0 ? (
               options.map((opt) => (
                 <li
                   key={opt.value}
                   onClick={() => handleSelect(opt)}
-                  className="px-4 py-3 rounded-xl text-sm font-bold text-gray-600 hover:bg-blue-50 hover:text-blue-600 cursor-pointer transition-colors"
+                  className="px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 cursor-pointer transition-colors"
                 >
                   {opt.label}
                 </li>
               ))
             ) : (
-              <li className="px-4 py-8 text-center text-xs text-gray-400 font-bold uppercase italic">
+              <li className="px-4 py-6 text-center text-xs text-gray-400 font-medium italic">
                 {isLoading ? "Mencari data..." : "Data tidak ditemukan"}
               </li>
             )}
@@ -154,10 +164,9 @@ export default function AsyncSelect({
         </div>
       )}
 
+      {/* ERROR MESSAGE DIUPDATE SAMA SEPERTI INPUT */}
       {error && (
-        <p className="text-[10px] text-red-500 font-bold ml-4 uppercase">
-          {error}
-        </p>
+        <p className="text-xs text-red-500 font-bold mt-1.5">{error}</p>
       )}
     </div>
   );

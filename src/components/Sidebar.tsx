@@ -14,6 +14,7 @@ import {
   Boxes,
   Refrigerator,
   PlusCircle,
+  ShieldCheck,
 } from "lucide-react";
 import { useLogout } from "../hooks/logout/useLogout";
 import { useAuth } from "../context/AuthContext";
@@ -41,8 +42,14 @@ const menuGroups = [
       },
       {
         name: "Permission Category",
-        href: "permission-category",
+        href: "/permission-category",
         icon: ShieldEllipsis,
+        permission: "",
+      },
+      {
+        name: "Permission",
+        href: "/permission",
+        icon: ShieldCheck,
         permission: "",
       },
       {
@@ -64,15 +71,15 @@ const menuGroups = [
         name: "Vending Machine",
         href: "/vending-machine",
         icon: Refrigerator,
-        permission:'',
+        permission: "",
       },
       {
-        name:"Vending Item",
-        href:'/vending-item',
-        icon:PlusCircle,
-        permission:'',
-      }
-    ]
+        name: "Vending Item",
+        href: "/vending-item",
+        icon: PlusCircle,
+        permission: "",
+      },
+    ],
   },
   {
     title: "Sistem",
@@ -103,7 +110,7 @@ export default function Sidebar({
     .map((group) => ({
       ...group,
       items: group.items.filter(
-        (item) => !item.permission || hasPermission(item.permission),
+        (item) => !item.permission || hasPermission(item.permission)
       ),
     }))
     .filter((group) => group.items.length > 0);
@@ -146,10 +153,11 @@ export default function Sidebar({
                     key={item.name}
                     href={item.href}
                     onClick={handleItemClick} // Menggunakan fungsi pengecekan lebar layar
-                    className={`flex items-center justify-between p-3 rounded-xl transition-all ${active
-                      ? "bg-blue-600 shadow-lg shadow-blue-900/50"
-                      : "hover:bg-blue-800/50 text-blue-100/70"
-                      }`}
+                    className={`flex items-center justify-between p-3 rounded-xl transition-all ${
+                      active
+                        ? "bg-blue-600 shadow-lg shadow-blue-900/50"
+                        : "hover:bg-blue-800/50 text-blue-100/70"
+                    }`}
                   >
                     <div className="flex items-center gap-3">
                       <item.icon size={18} />

@@ -1,9 +1,9 @@
 "use client"
 import { useState, useEffect, useCallback } from "react"
-import { Item, itemService } from "@/src/services/itemServices"
+import { Permission, permissionService } from "@/src/services/permissionServices";
 import { ActionResponse } from "@/src/types/common";
-export function useItem() {
-    const [item, setItem] = useState<Item[]>([]);
+export function usePermission() {
+    const [permission, setPermission] = useState<Permission[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
@@ -17,31 +17,30 @@ export function useItem() {
         pageSize: 5,
     });
 
-    const fetchItem = useCallback(async () => {
+    const fetchPermission = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await itemService.getAll(page, pageSize, search);
-            setItem(response.data);
+            const response = await permissionService.getAll(page, pageSize, search);
+            setPermission(response.data);
             setMeta(response.pagination);
         } catch (err: any) {
-            setError(err.message || "Gagal mengambil data item category");
+            setError(err.message || "Gagal mengambil data permission");
         } finally {
             setLoading(false);
         }
     }, [page, pageSize, search]);
 
     useEffect(() => {
-        fetchItem();
-    }, [fetchItem]);
+        fetchPermission();
+    }, [fetchPermission]);
 
- 
 
-    const addItem = async (payload: Item): Promise<ActionResponse> => {
+    const addPermission = async (payload: Permission): Promise<ActionResponse> => {
         try {
-            await itemService.create(payload);
-            await fetchItem();
-            return { success: true, message: "Berhasil menambah item" }
+            await permissionService.create(payload);
+            await fetchPermission();
+            return { success: true, message: "Berhasil menambah permission" }
         } catch (err: any) {
             return {
                 success: false,
@@ -51,10 +50,10 @@ export function useItem() {
         }
     }
 
-    const updateItem = async (id: number, payload: Item): Promise<ActionResponse> => {
+    const updatePermission = async (id: number, payload: Permission): Promise<ActionResponse> => {
         try {
-            await itemService.update(id, payload);
-            await fetchItem();
+            await permissionService.update(id, payload);
+            await fetchPermission();
             return { success: true, message: "Berhasil memperbarui data" };
         } catch (err: any) {
             return {
@@ -65,10 +64,10 @@ export function useItem() {
         }
     }
 
-    const deleteItem = async (id: number): Promise<ActionResponse> => {
+    const deletePermission = async (id: number): Promise<ActionResponse> => {
         try {
-            await itemService.delete(id);
-            await fetchItem();
+            await permissionService.delete(id);
+            await fetchPermission();
             return { success: true, message: "Berhasil menghapus data" };
         } catch (err: any) {
             return {
@@ -79,7 +78,7 @@ export function useItem() {
     };
 
     return {
-        item,
+        permission: permission,
         loading,
         error,
         meta,
@@ -88,9 +87,9 @@ export function useItem() {
         setPageSize,
         search,
         setSearch,
-        refresh: item,
-        addItem,
-        updateItem,
-        deleteItem,
+        refresh: permission,
+        addPermission: addPermission,
+        updatePermission: updatePermission,
+        deletePermission: deletePermission,
     }
 }
