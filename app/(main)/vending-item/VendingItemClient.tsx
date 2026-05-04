@@ -5,6 +5,7 @@ import {
   AlertCircle,
   LucideEye,
   ChevronLeft,
+  Save,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -52,6 +53,7 @@ export default function VendingItemClient() {
     setIsModalOpen,
     isSubmitting,
     serverErrors,
+    setServerErrors,
     handleOpenAdd,
     handleSave,
   } = useVendingItemAction({
@@ -238,57 +240,87 @@ export default function VendingItemClient() {
         />
       )}
 
-      {/* MODAL */}
       <FormShell
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="ASSIGN ITEM KE MESIN"
       >
-        <form onSubmit={handleSave} className="space-y-6 pt-2">
-          <AsyncSelect
-            label="Pilih Mesin"
-            apiEndpoint="/api/vendingmachine"
-            value={form.vendingMachineId ?? 0}
-            error={serverErrors?.VendingMachineId?.[0]}
-            onChange={(val) =>
-              setForm({ ...form, vendingMachineId: Number(val) })
-            }
-          />
-          <AsyncSelect
-            label="Pilih Barang"
-            apiEndpoint="/api/item"
-            value={form.itemId ?? 0}
-            error={serverErrors?.ItemId?.[0]}
-            onChange={(val) => setForm({ ...form, itemId: Number(val) })}
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Kapasitas"
-              type="number"
-              value={form.capacity}
-              onChange={(e) =>
-                setForm({ ...form, capacity: Number(e.target.value) })
-              }
+        <form onSubmit={handleSave} className="relative flex flex-col h-full overflow-hidden">
+
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 custom-scrollbar">
+            <AsyncSelect
+              label="Pilih Mesin"
+              apiEndpoint="/api/vendingmachine"
+              required
+              value={form.vendingMachineId ?? 0}
+              error={serverErrors?.vendingMachineId?.[0] || serverErrors?.VendingMachineId?.[0]}
+              onChange={(val) => {
+                setForm({ ...form, vendingMachineId: Number(val) });
+                if (serverErrors?.vendingMachineId || serverErrors?.VendingMachineId)
+                  setServerErrors({ ...serverErrors, vendingMachineId: [], VendingMachineId: [] });
+              }}
             />
-            <Input
-              label="Stok"
-              type="number"
-              value={form.quantity}
-              onChange={(e) =>
-                setForm({ ...form, quantity: Number(e.target.value) })
-              }
+
+            <AsyncSelect
+              label="Pilih Barang"
+              apiEndpoint="/api/item"
+              required
+              value={form.itemId ?? 0}
+              error={serverErrors?.itemId?.[0] || serverErrors?.ItemId?.[0]}
+              onChange={(val) => {
+                setForm({ ...form, itemId: Number(val) });
+                if (serverErrors?.itemId || serverErrors?.ItemId)
+                  setServerErrors({ ...serverErrors, itemId: [], ItemId: [] });
+              }}
             />
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Kapasitas"
+                type="number"
+                required
+                value={form.capacity}
+                error={serverErrors?.capacity?.[0] || serverErrors?.Capacity?.[0]}
+                onChange={(e) => {
+                  setForm({ ...form, capacity: Number(e.target.value) });
+                  if (serverErrors?.capacity || serverErrors?.Capacity)
+                    setServerErrors({ ...serverErrors, capacity: [], Capacity: [] });
+                }}
+              />
+              <Input
+                label="Stok"
+                type="number"
+                required
+                value={form.quantity}
+                error={serverErrors?.quantity?.[0] || serverErrors?.Quantity?.[0]}
+                onChange={(e) => {
+                  setForm({ ...form, quantity: Number(e.target.value) });
+                  if (serverErrors?.quantity || serverErrors?.Quantity)
+                    setServerErrors({ ...serverErrors, quantity: [], Quantity: [] });
+                }}
+              />
+            </div>
           </div>
-          <div className="pt-6 flex gap-4">
+
+          {/* AREA TOMBOL (FOOTER) */}
+          <div className="flex-none px-6 py-8 bg-white border-t border-gray-100 flex gap-4 shadow-[0_-15px_30px_-15px_rgba(0,0,0,0.05)]">
             <Button
-              variant="primary"
+              type="button"
+              variant="outline"
+              className="flex-1 rounded-2xl h-14 font-bold uppercase tracking-wider text-[10px]"
+              disabled={isSubmitting}
               onClick={() => setIsModalOpen(false)}
-              className="flex-1"
             >
               Batal
             </Button>
-            <Button type="submit" isLoading={isSubmitting} className="flex-1">
-              Simpan
+
+            <Button
+              type="submit"
+              className="flex-1 rounded-2xl h-14 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-100 font-bold uppercase tracking-wider text-[10px]"
+              isLoading={isSubmitting}
+              icon={<Save size={18} />}
+            >
+              Simpan Data
             </Button>
           </div>
         </form>

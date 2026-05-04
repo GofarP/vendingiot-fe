@@ -2,8 +2,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { employeeService, Employee } from "@/src/services/employeeServices"
 import { ActionResponse } from "@/src/types/common"
-import { departmentService } from "@/src/services/departmentServices";
-import { refresh } from "next/cache";
 
 export function useEmployee() {
     const [employee, setEmployee] = useState<Employee[]>([]);
@@ -27,12 +25,12 @@ export function useEmployee() {
         setLoading(true);
         setError(null);
         try {
-            const response = await departmentService.getAll(page, pageSize, search);
+            const response = await employeeService.getAll(page, pageSize, search);
             setEmployee(response.data);
             setMeta(response.pagination);
 
         } catch (err: any) {
-            setError(err.message || "Gagal mengambil data departemen");
+            setError(err.message || "Gagal mengambil data employee");
         }
         finally {
             setLoading(false);
@@ -43,34 +41,45 @@ export function useEmployee() {
         fetchEmployee();
     }, [fetchEmployee]);
 
-    const addEmployee = async (payload: Employee, photoFile: File): Promise<ActionResponse> => {
+    const addEmployee = async (payload: Employee, photoFile?: File): Promise<ActionResponse> => {
         try {
             await employeeService.create(payload, photoFile);
+
             await fetchEmployee();
-            return { success: true, message: "Berhasil menambah data employee" };
+
+            return {
+                success: true,
+                message: "Berhasil menambah data employee"
+            };
         } catch (err: any) {
             return {
                 success: false,
-                message: err.response?.data?.message || "Gagal menyimpan",
+                message: err.response?.data?.message || "Gagal menyimpan data",
                 errors: err.response?.data?.errors
             };
         }
-    }
+    };
 
-    const updateEmployee = async (id: number, payload: Employee, photoFile: File): Promise<ActionResponse> => {
+    const updateEmployee = async (id: number, payload: Employee, photoFile?: File): Promise<ActionResponse> => {
         try {
+            if (!id || id <= 0) throw new Error("ID karyawan tidak valid");
+
             await employeeService.update(id, payload, photoFile);
+
             await fetchEmployee();
-            return { success: true, message: "Berhasil memperbarui data" };
-        }
-        catch (err: any) {
+
+            return {
+                success: true,
+                message: "Berhasil memperbarui data karyawan"
+            };
+        } catch (err: any) {
             return {
                 success: false,
-                message: err.response?.data?.message || "Gagal memperbarui",
+                message: err.response?.data?.message || err.message || "Gagal memperbarui data",
                 errors: err.response?.data?.errors
-            }
+            };
         }
-    }
+    };
 
     const deleteEmployee = async (id: number): Promise<ActionResponse> => {
         try {
@@ -85,7 +94,7 @@ export function useEmployee() {
         }
     };
 
-    return{
+    return {
         employee,
         loading,
         error,
@@ -96,7 +105,7 @@ export function useEmployee() {
         setPageSize,
         search,
         setSearch,
-        refresh:fetchEmployee,
+        refresh: fetchEmployee,
         addEmployee,
         updateEmployee,
         deleteEmployee

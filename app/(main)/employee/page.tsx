@@ -1,5 +1,9 @@
-export default function Employee(){
-    return(
-        <p>Hello from Employee  </p>
-    );
+import { Metadata } from "next";
+import EmployeePage from "./EmployeeClient";
+export const metadata: Metadata = {
+  title: "Employee",
+};
+
+export default function Page() {
+  return <EmployeePage />;
 }

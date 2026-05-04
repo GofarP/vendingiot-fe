@@ -104,9 +104,6 @@ export default function PermissionPage() {
             render: (item) => (
               <div className="flex flex-col">
                 <b className="text-gray-900 tracking-tight">{item.name}</b>
-                <span className="text-[10px] text-blue-500 font-bold uppercase tracking-tighter">
-                  ID: #{item.id}
-                </span>
               </div>
             ),
           },
@@ -179,59 +176,58 @@ export default function PermissionPage() {
         onClose={() => setIsModalOpen(false)}
         title={selectedPermission ? "EDIT PERMISSION" : "TAMBAH PERMISSION"}
       >
-        <form onSubmit={handleSave} className="space-y-6 pt-2">
-          {/* FIELD 1: NAMA PERMISSION */}
-          <Input
-            label="Nama Permission"
-            required
-            type="text"
-            placeholder="Contoh: View Dashboard..."
-            value={form.name}
-            error={serverErrors?.Name?.[0]}
-            onChange={(e) => {
-              setForm({ ...form, name: e.target.value });
-              if (serverErrors?.Name)
-                setServerErrors({ ...serverErrors, Name: [] });
-            }}
-          />
+        <form onSubmit={handleSave} className="relative flex flex-col h-full overflow-hidden">
 
-          {/* FIELD 2: KATEGORI PERMISSION */}
-          <AsyncSelect
-            label="Kategori Permission"
-            apiEndpoint="/api/permissioncategory" // Pastikan endpoint ini sesuai dengan API C# lu
-            value={form.permissionCategoryId ?? 0}
-            error={serverErrors?.PermissionCategoryId?.[0]}
-            onChange={(val) => {
-              setForm({ ...form, permissionCategoryId: Number(val) });
-              if (serverErrors?.PermissionCategoryId)
-                setServerErrors({ ...serverErrors, PermissionCategoryId: [] });
-            }}
-          />
+          {/* AREA KONTEN - Scrollable */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 custom-scrollbar">
+            <Input
+              label="Nama Permission"
+              required
+              type="text"
+              placeholder="Contoh: View Dashboard..."
+              value={form.name}
+              error={serverErrors?.Name?.[0]}
+              onChange={(e) => {
+                setForm({ ...form, name: e.target.value });
+                if (serverErrors?.Name)
+                  setServerErrors({ ...serverErrors, Name: [] });
+              }}
+            />
 
-          {/* TOMBOL AKSI */}
-          <div className="pt-6 flex gap-4 mt-auto">
-            <button
+            <AsyncSelect
+              label="Kategori Permission"
+              apiEndpoint="/api/permissioncategory"
+              required
+              value={form.permissionCategoryId ?? 0}
+              error={serverErrors?.PermissionCategoryId?.[0]}
+              onChange={(val) => {
+                setForm({ ...form, permissionCategoryId: Number(val) });
+                if (serverErrors?.PermissionCategoryId)
+                  setServerErrors({ ...serverErrors, PermissionCategoryId: [] });
+              }}
+            />
+          </div>
+
+          {/* AREA TOMBOL (FOOTER) - Lebih Luas & Konsisten */}
+          <div className="flex-none px-6 py-8 bg-white border-t border-gray-100 flex gap-4 shadow-[0_-15px_30px_-15px_rgba(0,0,0,0.05)]">
+            <Button
               type="button"
+              variant="outline"
+              className="flex-1 rounded-2xl h-14 font-bold uppercase tracking-wider text-[10px]"
               disabled={isSubmitting}
               onClick={() => setIsModalOpen(false)}
-              className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-50"
             >
               Batal
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 py-3 rounded-xl bg-blue-600 text-sm font-bold text-white flex items-center justify-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-70"
+              className="flex-1 rounded-2xl h-14 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-100 font-bold uppercase tracking-wider text-[10px]"
+              isLoading={isSubmitting}
+              icon={<Save size={18} />}
             >
-              {isSubmitting ? (
-                <span className="animate-pulse">Menyimpan...</span>
-              ) : (
-                <>
-                  <Save size={18} /> Simpan Data
-                </>
-              )}
-            </button>
+              {selectedPermission ? "Simpan Perubahan" : "Simpan Data"}
+            </Button>
           </div>
         </form>
       </FormShell>

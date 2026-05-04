@@ -4,6 +4,7 @@ export interface Employee {
     fullName?: string;
     userName?: string;
     email?: string;
+    password?:string;
     photoUrl?: string;
     photo?: File | null;
 }
@@ -17,6 +18,7 @@ export const employeeService = {
                 search: search || undefined
             },
         });
+        
 
         return response.data;
     },
@@ -26,7 +28,7 @@ export const employeeService = {
         return response.data;
     },
 
-    create: async (data: Employee, photoFile: File) => {
+    create: async (data: Employee, photoFile?: File) => {
         const formData = new FormData();
         if (data.fullName) formData.append("fullName", data.fullName);
         if (data.userName) formData.append("userName", data.userName);

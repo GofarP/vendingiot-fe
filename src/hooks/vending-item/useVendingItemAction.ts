@@ -43,16 +43,16 @@ export function useVendingItemAction({
     const handleOpenEdit = (vendingItem: VendingItem) => {
         resetForm();
         setSelectedVendingItem(vendingItem);
-        setForm({ 
-            id: vendingItem.id, 
-            vendingMachineId: vendingItem.vendingMachineId, 
-            itemId: vendingItem.itemId, 
-            capacity: vendingItem.capacity, 
-            quantity: vendingItem.quantity 
+        setForm({
+            id: vendingItem.id,
+            vendingMachineId: vendingItem.vendingMachineId,
+            itemId: vendingItem.itemId,
+            capacity: vendingItem.capacity,
+            quantity: vendingItem.quantity
         });
         setIsModalOpen(true);
     };
-    
+
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -66,14 +66,13 @@ export function useVendingItemAction({
                 toast.success("Barang berhasil ditambahkan ke mesin.");
                 setIsModalOpen(false);
             } else {
+                if (res.errors) setServerErrors(res.errors);
                 toast.error(res.message || "Gagal menyimpan data.");
             }
         } catch (error: any) {
-            if (error.response?.data?.errors) {
-                setServerErrors(error.response.data.errors);
-            } else {
-                toast.error("Terjadi kesalahan pada server.");
-            }
+            const rawErrors = error.response?.data?.errors;
+            if (rawErrors) setServerErrors(rawErrors);
+            else toast.error("Terjadi kesalahan pada server.");
         } finally {
             setIsSubmitting(false);
         }
