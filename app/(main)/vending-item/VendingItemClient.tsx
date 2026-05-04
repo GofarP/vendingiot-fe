@@ -1,22 +1,38 @@
 "use client";
-import { Plus, Trash2, AlertCircle, Eye, LucideEye } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  AlertCircle,
+  LucideEye,
+  ChevronLeft,
+} from "lucide-react";
 import { toast } from "sonner";
+
+// UI Components
 import DataTable from "@/src/components/DataTable";
 import Button from "@/src/components/Button";
 import FormShell from "@/src/components/FormShell";
 import Input from "@/src/components/Input";
 import AsyncSelect from "@/src/components/AsyncSelect";
+import Pagination from "@/src/components/Pagination";
 
+// Modular Components
+import VendingItemGrid from "@/src/components/VendingItemGrid";
+
+// Hooks & Services
 import { useVendingItem } from "@/src/hooks/vending-item/useVendingItem";
 import { useVendingItemAction } from "@/src/hooks/vending-item/useVendingItemAction";
-import { VendingItem } from "@/src/services/vendingItemServices";
+import { VendingMachineWithStock } from "@/src/services/vendingItemServices";
 
 export default function VendingItemClient() {
   const {
-    vendingItem,
+    vendingMachines,
+    machineItems,
     loading,
     error,
     meta,
+    id,
+    machineCode,
     setId,
     setPage,
     setPageSize,
@@ -24,10 +40,10 @@ export default function VendingItemClient() {
     search,
     removeItemFromMachine,
     assignItemToMachine,
-    fetchItemByMachine,
     restock,
   } = useVendingItem();
 
+  const selectedMachine = vendingMachines.find((m) => m.id === id);
 
   const {
     form,
@@ -36,7 +52,6 @@ export default function VendingItemClient() {
     setIsModalOpen,
     isSubmitting,
     serverErrors,
-    setServerErrors,
     handleOpenAdd,
     handleSave,
   } = useVendingItemAction({
@@ -45,15 +60,13 @@ export default function VendingItemClient() {
     restockItem: restock,
   });
 
-  // 3. Fungsi hapus item dari mesin
-  const handleDelete = async (id: number) => {
-    if (confirm("Apakah Anda yakin ingin menghapus item ini dari mesin?")) {
-      const res = await removeItemFromMachine(id);
-      if (res.success) {
-        toast.success(res.message);
-      } else {
-        toast.error(res.message);
-      }
+  const handleDelete = async (targetId: number) => {
+    if (
+      confirm(id > 0 ? "Hapus item dari mesin?" : "Hapus data stok mesin ini?")
+    ) {
+      const res = await removeItemFromMachine(targetId);
+      if (res.success) toast.success(res.message);
+      else toast.error(res.message);
     }
   };
 
@@ -61,24 +74,38 @@ export default function VendingItemClient() {
     <div className="space-y-6">
       {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tighter leading-none">
-            Vending <span className="text-blue-600">Stock</span>
-          </h1>
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-2">
-            Manajemen Stok Barang di Mesin
-          </p>
+        <div className="flex items-center gap-3">
+          {id > 0 && (
+            <button
+              onClick={() => setId(0)}
+              className="p-2 hover:bg-gray-100 rounded-full transition-all text-gray-500"
+            >
+              <ChevronLeft size={24} />
+            </button>
+          )}
+          <div>
+            <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tighter leading-none">
+              Vending{" "}
+              <span className="text-blue-600">
+                {id > 0 ? "Inventory" : "Stock"}
+              </span>
+            </h1>
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-2">
+              {id > 0
+                ? `Detail Barang Mesin #${selectedMachine?.machineCode}`
+                : "Ringkasan Stok Seluruh Mesin"}
+            </p>
+          </div>
         </div>
         <Button
           onClick={() => handleOpenAdd(0)}
           icon={<Plus size={20} />}
           className="w-full md:w-auto"
         >
-          Assign Item Baru
+          {id > 0 ? "Tambah Barang ke Mesin" : "Assign Item Baru"}
         </Button>
       </div>
 
-      {/* ERROR ALERT */}
       {error && (
         <div className="bg-red-50 border border-red-100 p-4 rounded-2xl flex items-center gap-3 text-red-600 text-sm font-medium">
           <AlertCircle size={18} />
@@ -86,201 +113,183 @@ export default function VendingItemClient() {
         </div>
       )}
 
-      {/* DATATABLE */}
-      <DataTable
-        data={vendingItem}
-        isLoading={loading}
-        meta={meta}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-        onSearchChange={setSearch}
-        searchValue={search}
-        columns={[
-          {
-            label: "No",
-            render: (_, i) => (
-              <span className="text-gray-400 font-mono text-xs pl-4">
-                {((meta?.currentPage || 1) - 1) * (meta?.pageSize || 10) + i + 1}
-              </span>
-            ),
-          },
-          {
-            label: "Mesin & Barang",
-            render: (item: any) => (
-              <div className="flex flex-col">
-                <b className="text-gray-900 tracking-tight">
-                  {item.name}
-                </b>
-                <span className="text-[10px] text-blue-500 font-bold uppercase tracking-tighter">
-                  {item.vendingMachine?.name}
+      {/* MAIN CONTENT */}
+      {id > 0 ? (
+        <VendingItemGrid
+          data={machineItems}
+          isLoading={loading}
+          searchValue={search}
+          onSearch={setSearch}
+          onRestock={(itemId) => restock(itemId, 10)}
+          onDelete={handleDelete}
+        />
+      ) : (
+        <DataTable
+          data={vendingMachines}
+          isLoading={loading}
+          meta={meta}
+          onPageChange={setPage}
+          onPageSizeChange={setPageSize}
+          onSearchChange={setSearch}
+          searchValue={search}
+          columns={[
+            {
+              label: "No",
+              render: (_, i) => (
+                <span className="text-gray-400 font-mono text-xs pl-4">
+                  {((meta?.currentPage || 1) - 1) * (meta?.pageSize || 10) +
+                    i +
+                    1}
                 </span>
-              </div>
-            ),
-          },
-          {
-            label: "Ringkasan Inventaris",
-            render: (item: any) => (
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-blue-600 font-black text-xs uppercase tracking-tighter">
-                    {item.totalItemTypes} Tipe Barang
+              ),
+            },
+            {
+              label: "Mesin",
+              render: (item: VendingMachineWithStock) => (
+                <div className="flex flex-col">
+                  <b className="text-gray-900 tracking-tight">{item.name}</b>
+                  <span className="text-[10px] text-gray-400 font-bold uppercase">
+                    {item.machineCode}
                   </span>
                 </div>
-                <div className="text-[11px] text-gray-500 font-medium">
-                  {item.totalStock} Total Stok • {item.totalCategories} Kategori
+              ),
+            },
+            {
+              label: "Ringkasan Inventaris",
+              render: (item: VendingMachineWithStock) => (
+                <div className="flex flex-col gap-1">
+                  <span className="text-blue-600 font-black text-xs uppercase">
+                    {item.totalItemTypes} Tipe Barang
+                  </span>
+                  <div className="text-[11px] text-gray-500 font-medium">
+                    {item.totalStock} Unit • {item.totalCategories} Kategori
+                  </div>
                 </div>
-              </div>
-            ),
-          },
-
-          {
-            label: "Actions",
-            render: (item: VendingItem) => {
-              return (
+              ),
+            },
+            {
+              label: "Actions",
+              render: (item: VendingMachineWithStock) => (
                 <div className="flex gap-1 pr-4">
                   <button
-                    onClick={() => setId(item.id ?? 0)}
-                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-xl transition-all"
+                    onClick={() => setId(item.id)}
+                    className="p-2 text-blue-500 hover:bg-blue-50 rounded-xl"
                     title="Lihat isi mesin"
                   >
-                    <LucideEye size={15} />
+                    <LucideEye size={16} />
                   </button>
                   <button
-                    onClick={() => item.id && handleDelete(item.id)}
-                    className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                    title="Hapus mesin"
+                    onClick={() => handleDelete(item.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-xl"
                   >
-                    <Trash2 size={15} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
-              )
-
-            }
-          }
-        ]}
-        renderMobileCard={(item: any) => (
-          <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm space-y-4">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <h4 className="font-black text-gray-900 uppercase italic tracking-tight leading-none">
-                  {item.machineCode}
-                </h4>
-                <p className="text-[10px] font-bold text-blue-500 tracking-widest uppercase">
-                  {item.name}
-                </p>
+              ),
+            },
+          ]}
+          renderMobileCard={(item: VendingMachineWithStock) => (
+            <div className="bg-white p-6 rounded-4xl border border-gray-100 shadow-sm space-y-4">
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <h4 className="font-black text-gray-900 uppercase italic tracking-tight">
+                    {item.machineCode}
+                  </h4>
+                  <p className="text-[10px] font-bold text-blue-500 uppercase">
+                    {item.name}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setId(item.id)}
+                  className="p-2 text-blue-600 bg-blue-50 rounded-xl"
+                >
+                  <LucideEye size={18} />
+                </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl">
-              <span className="text-xs font-bold text-gray-400 uppercase">
-                Ringkasan Item
-              </span>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-blue-600 font-black text-xs uppercase tracking-tighter">
-                    {item.totalItemTypes} Tipe Barang
+              <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl">
+                <div className="flex flex-col gap-1">
+                  <span className="text-blue-600 font-black text-xs uppercase">
+                    {item.totalItemTypes} Tipe
                   </span>
-                </div>
-                <div className="text-[11px] text-gray-500 font-medium">
-                  {item.totalStock} Total Stok • {item.totalCategories} Kategori
+                  <div className="text-[11px] text-gray-500 font-medium">
+                    {item.totalStock} Total Stok
+                  </div>
                 </div>
               </div>
-
-            </div>
-
-            <div className="flex gap-2 pt-2">
               <button
-                className="flex-1 w-full flex justify-center items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 py-3 rounded-xl text-sm font-bold transition-all"
-                onClick={() => item.id && handleDelete(item.id)}
+                className="w-full flex justify-center items-center gap-2 bg-red-50 text-red-600 py-3 rounded-xl text-sm font-bold"
+                onClick={() => handleDelete(item.id)}
               >
-                <Trash2 size={16} /> Hapus Item
+                <Trash2 size={16} /> Hapus Data
               </button>
             </div>
-          </div>
-        )}
-      />
+          )}
+        />
+      )}
 
-      {/* MODAL FORM ASSIGN ITEM */}
+      {/* PAGINATION */}
+      {meta.totalPages > 1 && (
+        <Pagination
+          currentPage={meta.currentPage}
+          totalPages={meta.totalPages}
+          onPageChange={setPage}
+          totalItems={meta.totalCount}
+          itemsPerPage={meta.pageSize}
+        />
+      )}
+
+      {/* MODAL */}
       <FormShell
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="ASSIGN ITEM KE MESIN"
       >
         <form onSubmit={handleSave} className="space-y-6 pt-2">
-          {/* PILIH MESIN */}
           <AsyncSelect
             label="Pilih Mesin"
-            required
-            apiEndpoint="/api/vendingmachine" // Pastikan endpoint C# lu benar
+            apiEndpoint="/api/vendingmachine"
             value={form.vendingMachineId ?? 0}
             error={serverErrors?.VendingMachineId?.[0]}
-            onChange={(val) => {
-              setForm({ ...form, vendingMachineId: Number(val) });
-              if (serverErrors?.VendingMachineId)
-                setServerErrors({ ...serverErrors, VendingMachineId: [] });
-            }}
+            onChange={(val) =>
+              setForm({ ...form, vendingMachineId: Number(val) })
+            }
           />
-
-          {/* PILIH BARANG */}
           <AsyncSelect
-            label="Pilih Barang (Item)"
-            required
-            apiEndpoint="/api/item" // Pastikan endpoint C# lu benar
+            label="Pilih Barang"
+            apiEndpoint="/api/item"
             value={form.itemId ?? 0}
             error={serverErrors?.ItemId?.[0]}
-            onChange={(val) => {
-              setForm({ ...form, itemId: Number(val) });
-              if (serverErrors?.ItemId)
-                setServerErrors({ ...serverErrors, ItemId: [] });
-            }}
+            onChange={(val) => setForm({ ...form, itemId: Number(val) })}
           />
-
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Kapasitas Maks"
-              required
+              label="Kapasitas"
               type="number"
-              placeholder="0"
               value={form.capacity}
-              error={serverErrors?.Capacity?.[0]}
-              onChange={(e) => {
-                setForm({ ...form, capacity: Number(e.target.value) });
-                if (serverErrors?.Capacity)
-                  setServerErrors({ ...serverErrors, Capacity: [] });
-              }}
+              onChange={(e) =>
+                setForm({ ...form, capacity: Number(e.target.value) })
+              }
             />
-
             <Input
-              label="Stok Awal"
-              required
+              label="Stok"
               type="number"
-              placeholder="0"
               value={form.quantity}
-              error={serverErrors?.Quantity?.[0]}
-              onChange={(e) => {
-                setForm({ ...form, quantity: Number(e.target.value) });
-                if (serverErrors?.Quantity)
-                  setServerErrors({ ...serverErrors, Quantity: [] });
-              }}
+              onChange={(e) =>
+                setForm({ ...form, quantity: Number(e.target.value) })
+              }
             />
           </div>
-
-          <div className="pt-6 flex gap-4 mt-auto">
-            <button
-              type="button"
-              disabled={isSubmitting}
+          <div className="pt-6 flex gap-4">
+            <Button
+              variant="primary"
               onClick={() => setIsModalOpen(false)}
-              className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-50"
+              className="flex-1"
             >
               Batal
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1 py-3 rounded-xl bg-blue-600 text-sm font-bold text-white flex items-center justify-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-70"
-            >
-              {isSubmitting ? "Menyimpan..." : "Simpan Data"}
-            </button>
+            </Button>
+            <Button type="submit" isLoading={isSubmitting} className="flex-1">
+              Simpan
+            </Button>
           </div>
         </form>
       </FormShell>

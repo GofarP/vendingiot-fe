@@ -1,10 +1,18 @@
 "use client"
-import { useState, useEffect, useCallback } from "react"
-import { VendingItem, vendingItemService } from "@/src/services/vendingItemServices";
+import { useState, useEffect, useCallback } from "react";
+import {
+    VendingItem,
+    VendingItemDetail,
+    VendingMachineWithStock,
+    vendingItemService
+}
+    from "@/src/services/vendingItemServices";
+
 import { ActionResponse } from "@/src/types/common";
 
 export function useVendingItem() {
-    const [vendingItem, setVendingItem] = useState<VendingItem[]>([]);
+    const [vendingMachines, setVendingMachines] = useState<VendingMachineWithStock[]>([]);
+    const [machineItems, setMachineItems] = useState<VendingItemDetail[]>([]);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -13,41 +21,43 @@ export function useVendingItem() {
     const [pageSize, setPageSize] = useState(10);
     const [search, setSearch] = useState("");
     const [id, setId] = useState(0);
+    const [machineCode, setMachineCode]=useState("");
+
     const [meta, setMeta] = useState({
         totalCount: 0,
         totalPages: 0,
         currentPage: 1,
-        pageSize: 5,
+        pageSize: 10
     });
 
     const fetchVendingMachineWithStock = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await vendingItemService.getMachineWithStock(page, pageSize, search);
-            setVendingItem(response.data);
+            const response=await vendingItemService.getMachineWithStock(page, pageSize, search);
+            setVendingMachines(response.data);
             setMeta(response.pagination);
         } catch (err: any) {
-            setError(err.message || "Gagal mengambil vending item");
+            setError(err.message || "Gagal mengambil data mesin");
         } finally {
             setLoading(false);
         }
     }, [page, pageSize, search]);
 
     const fetchItemByMachine = useCallback(async () => {
+        if (id === 0) return;
         setLoading(true);
         setError(null);
         try {
             const response = await vendingItemService.getItemsByMachine(page, pageSize, search, id);
-            setVendingItem(response.data);
+            setMachineItems(response.data);
             setMeta(response.pagination);
-            console.log(response.data);
         } catch (err: any) {
-            setError(err.message || "Gagal mengambil data vending Item");
+            setError(err.message || "Gagal mengambil detail barang");
         } finally {
             setLoading(false);
         }
-    }, [page, pageSize, search,id]);
+    }, [page, pageSize, search, id]);
 
     useEffect(() => {
         if (id > 0) {
@@ -55,30 +65,29 @@ export function useVendingItem() {
         } else {
             fetchVendingMachineWithStock();
         }
-    }, [id, fetchVendingMachineWithStock, fetchItemByMachine])
-
-
+    }, [id, fetchVendingMachineWithStock, fetchItemByMachine]);
 
     const assignItemToMachine = async (payload: VendingItem): Promise<ActionResponse> => {
         try {
             await vendingItemService.assignItemToMachine(payload);
-            await fetchVendingMachineWithStock();
+            id > 0 ? await fetchItemByMachine() : await fetchVendingMachineWithStock();
             return { success: true, message: "Berhasil menambah stock ke dalam mesin" }
+        }
 
-        } catch (err: any) {
+        catch (err: any) {
             return {
                 success: false,
                 message: err.response?.data?.message || "Gagal menyimpan",
                 errors: err.response?.data?.errors
             }
         }
-    }
+    };
 
-    const removeItemFromMachine = async (id: number): Promise<ActionResponse> => {
+    const removeItemFromMachine = async (itemId: number): Promise<ActionResponse> => {
         try {
-            await vendingItemService.removeItemFromMachine(id);
-            await fetchVendingMachineWithStock();
-            return { success: true, message: "Berhasil menghapus data" };
+            await vendingItemService.removeItemFromMachine(itemId);
+            id > 0 ? await fetchItemByMachine() : await fetchVendingMachineWithStock();
+            return { success: true, message: "Berhasil menghapus data" }
         } catch (err: any) {
             return {
                 success: false,
@@ -87,37 +96,38 @@ export function useVendingItem() {
         }
     };
 
-    const restock = async (id: number, qty: number): Promise<ActionResponse> => {
+    const restock = async (itemId: number, qty: number): Promise<ActionResponse> => {
         try {
-            await vendingItemService.restock(id, qty);
+            await vendingItemService.restock(itemId, qty);
             await fetchItemByMachine();
             return { success: true, message: "Berhasil restock data" };
         } catch (err: any) {
             return {
                 success: false,
                 message: err.response?.data?.message || "Gagal restock"
-            }
+            };
         }
     }
 
-    return {
-        vendingItem,
+    return{
+        vendingMachines,
+        machineItems,
         loading,
         error,
         meta,
         page,
+        id,
+        machineCode,
         setPage,
         setId,
+        setMachineCode,
         pageSize,
         setPageSize,
         search,
         setSearch,
-        refresh: vendingItem,
-        fetchVendingMachineWithStock,
-        fetchItemByMachine,
         removeItemFromMachine,
         assignItemToMachine,
-        restock,
-    };
+        restock
+    }
 
 }

@@ -16,7 +16,7 @@ import Button from "@/src/components/Button";
 import FormShell from "@/src/components/FormShell";
 
 import { useVendingMachine } from "@/src/hooks/vendingmachine/useVendingMachine";
-import { UseVendingMachineAction } from "@/src/hooks/vendingmachine/useVendingMachineAction";
+import { useVendingMachineAction } from "@/src/hooks/vendingmachine/useVendingMachineAction";
 
 export default function DepartmentPage() {
   const {
@@ -45,7 +45,7 @@ export default function DepartmentPage() {
     handleOpenAdd,
     handleOpenEdit,
     handleSave,
-  } = UseVendingMachineAction({ addVendingMachine, updateVendingMachine });
+  } = useVendingMachineAction({ addVendingMachine, updateVendingMachine });
 
   const handleDelete = async (id: number) => {
     if (confirm("Apakah Anda yakin ingin menghapus mesin ini?")) {

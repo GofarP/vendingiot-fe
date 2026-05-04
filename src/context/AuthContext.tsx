@@ -1,5 +1,11 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { authService } from "../services/authServices";
 import { LoginResponse } from "../types/auth";
 
@@ -17,7 +23,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const savedUser = sessionStorage.getItem("vending_user");
     if (savedUser) {
-      console.log("running useEffect");
       setUserState(JSON.parse(savedUser));
     }
   }, []);
@@ -40,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       sessionStorage.clear();
       setUserState(null);
-      window.location.replace("/login"); 
+      window.location.replace("/login");
     }
   };
 
@@ -53,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth harus digunakan di dalam AuthProvider");
+  if (!context)
+    throw new Error("useAuth harus digunakan di dalam AuthProvider");
   return context;
 };

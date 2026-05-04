@@ -11,7 +11,7 @@ interface UseVendingMachine {
     updateVendingMachine: (id: number, payload: VendingMachine) => Promise<ActionResponse>;
 }
 
-export function UseVendingMachineAction({
+export function useVendingMachineAction({
     addVendingMachine,
     updateVendingMachine
 }: UseVendingMachine) {
