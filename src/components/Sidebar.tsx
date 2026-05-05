@@ -15,6 +15,7 @@ import {
   Refrigerator,
   PlusCircle,
   ShieldCheck,
+  ShieldCog,
 } from "lucide-react";
 import { useLogout } from "../hooks/logout/useLogout";
 import { useAuth } from "../context/AuthContext";
@@ -51,6 +52,11 @@ const menuGroups = [
         href: "/permission",
         icon: ShieldCheck,
         permission: "",
+      },
+      {
+        name: "Role",
+        href: "/role",
+        icon: ShieldCog,
       },
       {
         name: "Item Category",
@@ -110,7 +116,7 @@ export default function Sidebar({
     .map((group) => ({
       ...group,
       items: group.items.filter(
-        (item) => !item.permission || hasPermission(item.permission)
+        (item) => !item.permission || hasPermission(item.permission),
       ),
     }))
     .filter((group) => group.items.length > 0);

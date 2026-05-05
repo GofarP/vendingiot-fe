@@ -1,10 +1,23 @@
 "use client"
 import axiosInstance from "../lib/axios";
 
-export interface Role{
-    id?:number;
-    name:string;
+export interface Permission {
+  Id: number;
+  Name: string;
+  Category: string;
 }
+
+export interface Role {
+  Id?: string;
+  Name: string;
+  PermissionIds: number[];
+}
+
+export interface PermissionGroup {
+  Category: string;
+  Permissions: Permission[];
+}
+
 
 export const roleService = {
     getAll: async (page: number = 1, pageSize: number = 10, search: string = "") => {

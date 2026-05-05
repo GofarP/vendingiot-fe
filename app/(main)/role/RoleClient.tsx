@@ -1,198 +1,159 @@
-"use client"
-import { Plus, Pencil, Trash2, Save, AlertCircle, Form } from "lucide-react";
-import { toast } from "sonner";
-
-import DataTable from "@/src/components/DataTable";
+"use client";
+import React from "react";
+import { Save } from "lucide-react";
+import FormShell from "@/src/components/FormShell";
 import Input from "@/src/components/Input";
 import Button from "@/src/components/Button";
-import FormShell from "@/src/components/FormShell";
-import { useRole } from "@/src/hooks/role/useRole";
 import { UseRoleActions } from "@/src/hooks/role/useRoleAction";
+import { PermissionGroup } from "@/src/services/roleServices";
 
-export default function RolePage() {
-    const {
-        role,
-        loading,
-        error,
-        meta,
-        setPage,
-        setPageSize,
-        setSearch,
-        search,
-        addRole,
-        updateRole,
-        deleteRole,
-    } = useRole();
+// Mock Data (Ganti dengan data dari API lu nanti)
+const mockPermissions: PermissionGroup[] = [
+  {
+    Category: "Management",
+    Permissions: [
+      { Id: 1, Name: "View Dashboard", Category: "Management" },
+      { Id: 2, Name: "Manage Users", Category: "Management" },
+    ],
+  },
+  {
+    Category: "Vending Machine",
+    Permissions: [
+      { Id: 3, Name: "Assign Items", Category: "Vending Machine" },
+      { Id: 4, Name: "Restock Machine", Category: "Vending Machine" },
+    ],
+  },
+];
 
-    const {
-        form,
-        setForm,
-        isModalOpen,
-        setIsModalOpen,
-        selectedRole,
-        isSubmitting,
-        serverErrors,
-        setServerErrors,
-        handleOpenAdd,
-        handleOpenEdit,
-        handleSave,
-    } = UseRoleActions({ addRole, updateRole })
+export default function RoleForm({ addRole, updateRole }: any) {
+  const {
+    form,
+    isModalOpen,
+    selectedRole,
+    isSubmitting,
+    serverErrors,
+    setForm,
+    setIsModalOpen,
+    handleOpenAdd,
+    handleOpenEdit,
+    handleTogglePermission,
+    handleSelectAllCategory,
+    handleSave,
+    setServerErrors,
+  } = UseRoleActions({ addRole, updateRole });
 
-    const handleDelete = async (id: number) => {
-        if (confirm("Apakah Anda yakin ingin menghapus role ini?")) {
-            const res = await deleteRole(id);
-            if (res.success) {
-                toast.success("Data role berhasil dihapus");
-            } else {
-                toast.error(res.message);
-            }
-        }
-    };
+  return (
+    <FormShell
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      title={selectedRole ? "EDIT ROLE" : "TAMBAH ROLE"}
+    >
+      <form
+        onSubmit={handleSave}
+        className="relative flex flex-col h-[600px] overflow-hidden"
+      >
+        {/* AREA SCROLLABLE */}
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8 custom-scrollbar">
+          <Input
+            label="Nama Role"
+            placeholder="Contoh: Super Admin, Operator..."
+            required
+            value={form.Name}
+            error={serverErrors?.Name?.[0]}
+            onChange={(e) => {
+              setForm({ ...form, Name: e.target.value });
+              if (serverErrors?.Name)
+                setServerErrors({ ...serverErrors, Name: [] });
+            }}
+          />
 
-    return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
-                <div>
-                    <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tighter leading-none">
-                        Role <span className="text-blue-600">List</span>
-                    </h1>
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-2">
-                        Management of employee role
-                    </p>
-                </div>
+          <div className="space-y-4">
+            <h3 className="text-sm font-black text-blue-900 italic uppercase tracking-widest">
+              Assign Permissions
+            </h3>
 
-                <Button
-                    onClick={handleOpenAdd}
-                    icon={<Plus size={20} />}
-                    className="w-full md:w-auto"
-                >
-                    Tambah Data
-                </Button>
+            <div className="grid gap-6">
+              {mockPermissions.map((group) => {
+                const categoryIds = group.Permissions.map((p) => p.Id);
+                const isAllSelected = categoryIds.every((id) =>
+                  form.PermissionIds.includes(id),
+                );
+
+                return (
+                  <div
+                    key={group.Category}
+                    className="bg-gray-50/50 rounded-[2.5rem] border border-gray-100 overflow-hidden"
+                  >
+                    <div className="px-6 py-4 bg-gray-100/50 flex justify-between items-center border-b border-gray-100">
+                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-tighter">
+                        {group.Category}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleSelectAllCategory(categoryIds, !isAllSelected)
+                        }
+                        className={`text-[9px] font-bold px-3 py-1 rounded-full transition-all ${
+                          isAllSelected
+                            ? "bg-blue-600 text-white"
+                            : "bg-white text-blue-600 border border-blue-100"
+                        }`}
+                      >
+                        {isAllSelected ? "Deselect All" : "Select All"}
+                      </button>
+                    </div>
+
+                    <div className="p-4 grid grid-cols-1 gap-2">
+                      {group.Permissions.map((perm) => (
+                        <label
+                          key={perm.Id}
+                          className="flex items-center gap-3 p-3 rounded-2xl hover:bg-white transition-all cursor-pointer group"
+                        >
+                          <input
+                            type="checkbox"
+                            className="w-5 h-5 rounded-lg border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={form.PermissionIds.includes(perm.Id)}
+                            onChange={() => handleTogglePermission(perm.Id)}
+                          />
+                          <span className="text-sm font-medium text-gray-600 group-hover:text-blue-900">
+                            {perm.Name}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            {error && (
-                <div className="bg-red-50 border border-red-100 p-4 rounded-2xl flex items-center gap-3 text-red-600 text-sm font-medium">
-                    <AlertCircle size={18} />
-                    {error}
-                </div>
+            {serverErrors?.PermissionIds && (
+              <p className="text-xs text-red-500 font-bold mt-2">
+                {serverErrors.PermissionIds[0]}
+              </p>
             )}
-
-            <DataTable
-                data={role}
-                isLoading={loading}
-                meta={meta}
-                onPageChange={setPage}
-                onPageSizeChange={setPageSize}
-                onSearchChange={setSearch}
-                searchValue={search}
-                columns={[
-                    {
-                        label: "No",
-                        render: (_, i) => (
-                            <span className="text-gray-400 font-mono text-xs pl-4">
-                                {i + 1}
-                            </span>
-                        ),
-                    },
-                    {
-                        label: "Role Name",
-                        render: (item) => (
-                            <div className="flex items-center gap-3">
-                                <b className="text-gray-900 tracking-tight">{item.name}</b>
-                            </div>
-                        ),
-                    },
-                    {
-                        label: "Actions",
-                        render: (item) => (
-                            <div className="flex gap-1 pr-4">
-                                <button
-                                    onClick={() => handleOpenEdit(item)}
-                                    className="p-2 text-yellow-500 hover:bg-yellow-50 rounded-xl transition-all"
-                                >
-                                    <Pencil size={15} />
-                                </button>
-                                <button
-                                    onClick={() => item.id && handleDelete(item.id)}
-                                    className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                                >
-                                    <Trash2 size={15} />
-                                </button>
-                            </div>
-                        ),
-                    },
-                ]}
-                renderMobileCard={(item) => (
-                    <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm space-y-4">
-                        <div className="flex items-center gap-4">
-                            <h4 className="font-black text-gray-900 uppercase italic tracking-tight leading-none">
-                                {item.name}
-                            </h4>
-                        </div>
-                        <div className="flex gap-2 pt-2">
-                            <Button
-                                variant="outline"
-                                className="flex-1 text-yellow-500 bg-yellow-100"
-                                onClick={() => handleOpenEdit(item)}
-                                icon={<Pencil size={14} />}
-                            >
-                                Edit
-                            </Button>
-                            <Button
-                                variant="danger"
-                                className="flex-1"
-                                onClick={() => item.id && handleDelete(item.id)}
-                                icon={<Trash2 size={14} />}
-                            >
-                                Hapus
-                            </Button>
-                        </div>
-                    </div>
-                )}
-            />
-
-            <FormShell
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                title={selectedRole ? "Edit Role" : "Tambah Role"}
-            >
-
-                <form onSubmit={handleSave} className="space-y-8 py-2">
-                    <Input
-                        label="Nama Role"
-                        placeholder="Contoh: Admin, Programmer..."
-                        required
-                        value={form.name}
-                        error={serverErrors.Name?.[0]}
-                        onChange={(e) => {
-                            setForm({ ...form, name: e.target.value });
-                            if (serverErrors.Name)
-                                setServerErrors({ ...serverErrors, Name: [] });
-                        }}
-                    />
-
-                    <div className="pt-6 flex gap-4">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="flex-1"
-                            disabled={isSubmitting}
-                            onClick={() => setIsModalOpen(false)}
-                        >
-                            Batal
-                        </Button>
-                        <Button
-                            type="submit"
-                            className="flex-1"
-                            icon={<Save size={18} />}
-                            isLoading={isSubmitting}
-                        >
-                            Simpan Data
-                        </Button>
-                    </div>
-                </form>
-
-            </FormShell>
-
+          </div>
         </div>
-    )
+
+        {/* STICKY FOOTER */}
+        <div className="flex-none px-6 py-8 bg-white border-t border-gray-100 flex gap-4 shadow-[0_-15px_30px_-15px_rgba(0,0,0,0.05)]">
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 rounded-2xl h-14 font-bold uppercase tracking-wider text-[10px]"
+            disabled={isSubmitting}
+            onClick={() => setIsModalOpen(false)}
+          >
+            Batal
+          </Button>
+          <Button
+            type="submit"
+            className="flex-1 rounded-2xl h-14 bg-blue-600 shadow-lg shadow-blue-100 font-bold uppercase tracking-wider text-[10px]"
+            isLoading={isSubmitting}
+            icon={<Save size={18} />}
+          >
+            Simpan Role
+          </Button>
+        </div>
+      </form>
+    </FormShell>
+  );
 }
