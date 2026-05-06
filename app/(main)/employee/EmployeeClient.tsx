@@ -11,6 +11,7 @@ import FormShell from "@/src/components/FormShell";
 import { useEmployee } from "@/src/hooks/employee/useEmployee";
 import { useEmployeeActions } from "@/src/hooks/employee/useEmployeeAction";
 import ImageUpload from "@/src/components/ImageUpload";
+import AsyncSelect from "@/src/components/AsyncSelect";
 
 export default function EmployeePage() {
     const {
@@ -102,7 +103,7 @@ export default function EmployeePage() {
                                 {/* Avatar/Photo Section */}
                                 {item.photoUrl ? (
                                     <img
-                                        src={item.photoUrl}
+                                        src={`${process.env.NEXT_PUBLIC_API_URL}${item.photoUrl}`}
                                         alt={item.fullName}
                                         className="w-8 h-8 rounded-full object-cover border border-gray-100"
                                     />
@@ -196,6 +197,7 @@ export default function EmployeePage() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 title={selectedEmployee ? "Edit Employee" : "Tambah Employee"}
+
             >
                 <form
                     onSubmit={handleSave}
@@ -204,7 +206,13 @@ export default function EmployeePage() {
                     <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 overscroll-contain custom-scrollbar">
                         <div className="bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 flex justify-center shadow-inner">
                             <ImageUpload
-                                value={form.photoUrl}
+                                value={
+                                    form.photo ?
+                                    URL.createObjectURL(form.photo)
+                                    :form.photoUrl
+                                    ? `${process.env.NEXT_PUBLIC_API_URL}${form.photoUrl}`
+                                    :""
+                                }
                                 onChange={(file) => {
                                     setForm({ ...form, photo: file });
                                     if (serverErrors?.Photo) setServerErrors({ ...serverErrors, Photo: [] });
@@ -249,6 +257,18 @@ export default function EmployeePage() {
                                     setForm({ ...form, password: e.target.value });
                                     if (serverErrors?.Password) setServerErrors({ ...serverErrors, Password: [] });
                                 }}
+                            />
+                            <AsyncSelect
+                                label="Employee Role"
+                                apiEndpoint="/api/role"
+                                value={form.roleId ?? 0}
+                                initialLabel={selectedEmployee?.role?.name || ""}
+                                onChange={(val) => {
+                                    setForm({ ...form, roleId: String(val) });
+                                    if (serverErrors?.RoleId)
+                                        setServerErrors({ ...serverErrors, roleId: [] });
+                                }}
+                                error={serverErrors?.RoleId?.[0]}
                             />
                         </div>
                     </div>

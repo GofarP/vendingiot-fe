@@ -1,12 +1,15 @@
 import axiosInstance from "../lib/axios";
+import { Role } from "./roleServices";
 export interface Employee {
-    id?:number;
+    id?: number;
     fullName?: string;
     userName?: string;
     email?: string;
-    password?:string;
+    password?: string;
     photoUrl?: string;
     photo?: File | null;
+    roleId?: string;
+    role?: Role
 }
 
 export const employeeService = {
@@ -18,7 +21,7 @@ export const employeeService = {
                 search: search || undefined
             },
         });
-        
+
 
         return response.data;
     },
@@ -28,14 +31,17 @@ export const employeeService = {
         return response.data;
     },
 
-    create: async (data: Employee, photoFile?: File) => {
+    create: async (data: Employee, photo?: File) => {
         const formData = new FormData();
+        if(data.id)formData.append("id",String(data.id));
         if (data.fullName) formData.append("fullName", data.fullName);
         if (data.userName) formData.append("userName", data.userName);
         if (data.email) formData.append("email", data.email);
+        if (data.password) formData.append("password", data.password);
+        if (data.roleId) formData.append("RoleId", data.roleId);
 
-        if (photoFile) {
-            formData.append('photo', photoFile);
+        if (photo) {
+            formData.append('Photo', photo);
         }
 
         const response = await axiosInstance.post(`/api/user`, formData, {
@@ -47,15 +53,19 @@ export const employeeService = {
         return response.data;
     },
 
-    update: async (id: number, data: Employee, photoFile?: File) => {
+    update: async (id: number, data: Employee, photo?: File) => {
         const formData = new FormData();
 
+        if(data.id) formData.append("id",String(data.id));
         if (data.fullName) formData.append("fullName", data.fullName);
         if (data.userName) formData.append("userName", data.userName);
         if (data.email) formData.append("email", data.email);
+        if (data.password) formData.append("password", data.password);
+        if (data.roleId) formData.append("RoleId", data.roleId);
 
-        if (photoFile) {
-            formData.append("photo", photoFile);
+
+        if (photo) {
+            formData.append("Photo", photo);
         }
 
         const response = await axiosInstance.put(`/api/user/${id}`, formData, {

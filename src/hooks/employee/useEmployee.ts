@@ -41,9 +41,11 @@ export function useEmployee() {
         fetchEmployee();
     }, [fetchEmployee]);
 
-    const addEmployee = async (payload: Employee, photoFile?: File): Promise<ActionResponse> => {
+    const addEmployee = async (payload: Employee, photo?: File): Promise<ActionResponse> => {
+        console.log(payload);
+
         try {
-            await employeeService.create(payload, photoFile);
+            await employeeService.create(payload, photo);
 
             await fetchEmployee();
 
@@ -60,11 +62,11 @@ export function useEmployee() {
         }
     };
 
-    const updateEmployee = async (id: number, payload: Employee, photoFile?: File): Promise<ActionResponse> => {
+    const updateEmployee = async (id: number, payload: Employee, photo?: File): Promise<ActionResponse> => {
         try {
             if (!id || id <= 0) throw new Error("ID karyawan tidak valid");
 
-            await employeeService.update(id, payload, photoFile);
+            await employeeService.update(id, payload, photo);
 
             await fetchEmployee();
 

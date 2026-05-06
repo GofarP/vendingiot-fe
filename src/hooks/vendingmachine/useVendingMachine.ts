@@ -42,6 +42,7 @@ export function useVendingMachine() {
             await fetchVendingMachine();
             return { success: true, message: "Berhasil menambah vending Machine" }
         } catch (err: any) {
+            console.log("create error:",err.response.data?.errors);
             return {
                 success: false,
                 message: err.response?.data?.message || "Gagal menyimpan",

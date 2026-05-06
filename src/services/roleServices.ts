@@ -1,55 +1,68 @@
-"use client"
+import { create } from "domain";
 import axiosInstance from "../lib/axios";
-
-export interface Permission {
-  Id: number;
-  Name: string;
-  Category: string;
-}
+import { ActionResponse } from "../types/common";
 
 export interface Role {
-  Id?: string;
-  Name: string;
-  PermissionIds: number[];
+  id?: string;
+  name: string;
+  permissionIds: number[];
+  permissions?: string[];
 }
 
 export interface PermissionGroup {
-  Category: string;
-  Permissions: Permission[];
+  category: string;
+  permissions: {
+    id: number;
+    name: string;
+  }[];
 }
 
-
 export const roleService = {
-    getAll: async (page: number = 1, pageSize: number = 10, search: string = "") => {
-        const response = await axiosInstance.get("/api/role", {
-            params: {
-                page,
-                pageSize,
-                search: search || undefined
-            },
-        });
-        return response.data;
-    },
+  getAll: async (page = 1, pageSize = 10, search = "") => {
+    const res = await axiosInstance.get("/api/role", {
+      params: { page, pageSize, search: search || undefined },
+    });
 
-    getById: async (id: number) => {
-        const response = await axiosInstance.get<Role>(`/api/role/${id}`);
-        return response.data;
-    },
+    return res.data;
+  },
 
-    create:async(data:Role)=>{
-        const response=await axiosInstance.post<Role>(`/api/role`,data);
-        return response.data;
-    },
+  getPermissions: async (search: string = "") => {
+    const res = await axiosInstance.get("/api/permission", {
+      params: { search: search || undefined, pageSize: 50 }
+    });
 
-    update:async(id:number, data:Role)=>{
-        const response=await axiosInstance.put(`/api/role/${id}`,data);
-        return response.data;
-    },
+    return res.data;
+  },
 
-    delete:async(id:number)=>{
-        const response=await axiosInstance.delete(`/api/role/${id}`);
-        return response.data;
+  create: async (data: Role): Promise<ActionResponse> => {
+    try {
+      await axiosInstance.post("/api/role", data);
+      return { success: true, message: "Success Menambahkan Role " }
+    } catch (err: any) {
+      return { success: false, errors: err.response?.data?.errors, message: err.response?.data?.message };
     }
+  },
+
+  update: async (id: string, data: Role): Promise<ActionResponse> => {
+    try {
+      await axiosInstance.put(`/api/role/${id}`, data);
+      return { success: true, message: "Ok" };
+    } catch (err: any) {
+      return { success: false, errors: err.response?.data?.errors, message: err.response?.data?.message };
+    }
+  },
+
+  delete:async(id:string):Promise<ActionResponse>=>{
+    try{
+      await axiosInstance.delete(`/api/role/${id}`);
+      return {success:true, message:"Success deleting role"}
+    }
+    catch(err:any){
+      return {success:false, message:err.response?.data?.message}
+    }
+  }
+
+
 
 
 }

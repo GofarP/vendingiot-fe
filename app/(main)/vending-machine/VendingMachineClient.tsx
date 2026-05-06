@@ -133,11 +133,10 @@ export default function DepartmentPage() {
             label: "Status",
             render: (item) => (
               <span
-                className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-                  item.isActive
+                className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${item.isActive
                     ? "bg-green-100 text-green-600"
                     : "bg-red-100 text-red-600"
-                }`}
+                  }`}
               >
                 {item.isActive ? "Active" : "Inactive"}
               </span>
@@ -149,10 +148,10 @@ export default function DepartmentPage() {
               <span className="text-gray-500 text-xs font-mono">
                 {item.lastRestock
                   ? new Date(item.lastRestock).toLocaleDateString("id-ID", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
                   : "Belum pernah"}
               </span>
             ),
@@ -189,11 +188,10 @@ export default function DepartmentPage() {
                 </p>
               </div>
               <span
-                className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
-                  item.isActive
+                className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${item.isActive
                     ? "bg-green-100 text-green-600"
                     : "bg-red-100 text-red-600"
-                }`}
+                  }`}
               >
                 {item.isActive ? "● Active" : "● Inactive"}
               </span>
@@ -256,8 +254,9 @@ export default function DepartmentPage() {
               error={serverErrors.MachineCode?.[0]}
               onChange={(e) => {
                 setForm({ ...form, machineCode: e.target.value });
-                if (serverErrors.MachineCode)
+                if (serverErrors?.Price) {
                   setServerErrors({ ...serverErrors, MachineCode: [] });
+                }
               }}
             />
 
@@ -294,6 +293,7 @@ export default function DepartmentPage() {
               </label>
               <input
                 type="datetime-local"
+                required
                 value={form.lastRestock ?? ""}
                 onChange={(e) =>
                   setForm({ ...form, lastRestock: e.target.value })
@@ -317,9 +317,8 @@ export default function DepartmentPage() {
                     className="w-5 h-5 rounded-lg accent-blue-600 cursor-pointer"
                   />
                   <span
-                    className={`text-xs font-black uppercase tracking-widest ${
-                      form.isActive ? "text-blue-600" : "text-gray-400"
-                    }`}
+                    className={`text-xs font-black uppercase tracking-widest ${form.isActive ? "text-blue-600" : "text-gray-400"
+                      }`}
                   >
                     {form.isActive ? "Active" : "Inactive"}
                   </span>

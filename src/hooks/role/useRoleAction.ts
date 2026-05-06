@@ -1,93 +1,49 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Role } from "@/src/services/roleServices";
-import { ActionResponse } from "@/src/types/common";
+import { Role, roleService } from "@/src/services/roleServices";
 
-interface UseRoleActionProps {
-  addRole: (payload: Role) => Promise<ActionResponse>;
-  updateRole: (id: string, payload: Role) => Promise<ActionResponse>;
-}
-
-export function UseRoleActions({ addRole, updateRole }: UseRoleActionProps) {
+export function UseRoleActions(refreshTable: () => void) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverErrors, setServerErrors] = useState<Record<string, string[]>>({});
-
-  const [form, setForm] = useState<Role>({
-    Name: "",
-    PermissionIds: [],
-  });
-
-  const resetForm = () => {
-    setForm({ Name: "", PermissionIds: [] });
-    setServerErrors({});
-    setSelectedRole(null);
-  };
+  const [form, setForm] = useState<Role>({ name: "", permissionIds: [] });
 
   const handleOpenAdd = () => {
-    resetForm();
-    setIsModalOpen(true);
-  };
-
-  const handleOpenEdit = (role: Role) => {
-    resetForm();
-    setSelectedRole(role);
-    setForm({
-      Id: role.Id,
-      Name: role.Name,
-      PermissionIds: role.PermissionIds || [],
-    });
-    setIsModalOpen(true);
-  };
-
-  const handleTogglePermission = (id: number) => {
-    setForm((prev) => ({
-      ...prev,
-      PermissionIds: prev.PermissionIds.includes(id)
-        ? prev.PermissionIds.filter((pId) => pId !== id)
-        : [...prev.PermissionIds, id],
-    }));
-
-    if (serverErrors.PermissionIds) {
-      setServerErrors({ ...serverErrors, PermissionIds: [] });
-    }
-  };
-
-  const handleSelectAllCategory = (categoryIds: number[], isChecked: boolean) => {
-    setForm((prev) => ({
-      ...prev,
-      PermissionIds: isChecked
-        ? Array.from(new Set([...prev.PermissionIds, ...categoryIds]))
-        : prev.PermissionIds.filter((id) => !categoryIds.includes(id)),
-    }));
-  };
-
-  const handleSave = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    setIsSubmitting(true);
+    setForm({ name: "", permissionIds: [] })
     setServerErrors({});
+    setSelectedRole(null);
+    setIsModalOpen(true);
+  }
 
-    const action = selectedRole?.Id
-      ? updateRole(selectedRole.Id, form)
-      : addRole(form);
+  const handleOpenEdit = (item: Role) => {
+    setForm({
+      id: item.id,
+      name: item.name,
+      permissionIds: item.permissionIds || []
+    });
+    setServerErrors({});
+    setSelectedRole(item);
+    setIsModalOpen(true);
+  }
 
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const action = selectedRole?.id ? roleService.update(selectedRole.id, form) : roleService.create(form);
     const res = await action;
-    setIsSubmitting(false);
-
     if (res.success) {
-      toast.success(selectedRole ? "Role diperbarui" : "Role ditambahkan");
+      toast.success("Data berhasil disimpan")
       setIsModalOpen(false);
-      resetForm();
+      refreshTable();
     } else {
       if (res.errors) setServerErrors(res.errors);
-      toast.error(res.message || "Gagal menyimpan data.");
+      toast.error(res.message || "Gagal menyimpan data");
     }
+    setIsSubmitting(false);
   };
 
-  return {
-    form, isModalOpen, selectedRole, isSubmitting, serverErrors,
-    setForm,setServerErrors, setIsModalOpen, handleOpenAdd, handleOpenEdit,
-    handleTogglePermission, handleSelectAllCategory, handleSave
-  };
+    return { form, setForm, isModalOpen, setIsModalOpen, isSubmitting, serverErrors, setServerErrors, handleOpenAdd, handleOpenEdit, handleSave, selectedRole };
+
+
 }

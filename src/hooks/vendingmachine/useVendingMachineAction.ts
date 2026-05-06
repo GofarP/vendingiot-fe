@@ -45,6 +45,7 @@ export function useVendingMachineAction({
         if (e) e.preventDefault();
 
         setIsSubmitting(true);
+        
         setServerErrors({});
 
         const action = selectedVendingMachine?.id
