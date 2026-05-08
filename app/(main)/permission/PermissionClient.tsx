@@ -56,10 +56,10 @@ export default function PermissionPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
         <div>
           <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tighter leading-none">
-            Item <span className="text-blue-600">List</span>
+            Permission <span className="text-blue-600">List</span>
           </h1>
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-2">
-            Management of item
+            Management of permission
           </p>
         </div>
         <Button
@@ -199,6 +199,7 @@ export default function PermissionPage() {
               apiEndpoint="/api/permissioncategory"
               required
               value={form.permissionCategoryId ?? 0}
+              initialLabel={selectedPermission?.permissionCategory?.name || "Kategori tidak ditemukan"}
               error={serverErrors?.PermissionCategoryId?.[0]}
               onChange={(val) => {
                 setForm({ ...form, permissionCategoryId: Number(val) });

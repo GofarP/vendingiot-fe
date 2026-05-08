@@ -33,7 +33,7 @@ const menuGroups = [
         name: "Employee",
         href: "/employee",
         icon: Users,
-        permission: "",
+        permission: "view-employee",
       },
       {
         name: "Department",
@@ -104,7 +104,6 @@ export default function Sidebar({
 }) {
   const pathname = usePathname();
   const { hasPermission, isLoading } = useAuth();
-  const { logout, isLoggingOut } = useLogout();
 
   const handleItemClick = () => {
     if (window.innerWidth < 1024) {

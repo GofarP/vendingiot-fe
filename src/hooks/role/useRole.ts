@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { roleService, Role } from "@/src/services/roleServices";
-import { refresh } from "next/cache";
 
 
 export function useRole(searchQuery: string) {

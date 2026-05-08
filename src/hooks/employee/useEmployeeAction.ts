@@ -65,7 +65,6 @@ export function useEmployeeActions({
             photo: null
         });
 
-        console.log(employee);
 
         setIsModalOpen(true);
     };

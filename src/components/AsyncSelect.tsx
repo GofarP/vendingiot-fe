@@ -35,27 +35,26 @@ export default function AsyncSelect({
   const [options, setOptions] = useState<Option[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLabel, setSelectedLabel] = useState("");
-  const [activeIndex, setActiveIndex] = useState(-1); // Navigasi keyboard
-  const [dropUp, setDropUp] = useState(false); // Smart positioning
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [dropUp, setDropUp] = useState(false);
 
   const debouncedSearch = useDebounce(searchTerm, 500);
   const dropDownRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
-    if (value && initialLabel) {
+    if (initialLabel) {
       setSelectedLabel(initialLabel);
-    } else if (!value) {
+    } 
+    else if (value === "" || value === null || value === undefined) {
       setSelectedLabel("");
     }
-  },[value,initialLabel]);
+  }, [value, initialLabel]); 
 
-  // 1. Logika Smart Positioning (Top vs Bottom)
   const checkSpace = () => {
     if (dropDownRef.current) {
       const rect = dropDownRef.current.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
-      // Jika ruang di bawah kurang dari 300px, tampilkan di atas
       setDropUp(spaceBelow < 300);
     }
   };
@@ -73,7 +72,6 @@ export default function AsyncSelect({
     };
   }, [isOpen]);
 
-  // 2. Fetch Data
   useEffect(() => {
     const fetchData = async () => {
       if (!isOpen || debouncedSearch.trim().length === 0) {
@@ -120,10 +118,12 @@ export default function AsyncSelect({
     setSearchTerm("");
   };
 
-  // 4. Keyboard Navigation Logic
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen) {
-      if (e.key === "Enter" || e.key === "ArrowDown") setIsOpen(true);
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setIsOpen(true);
+      }
       return;
     }
 
@@ -137,8 +137,8 @@ export default function AsyncSelect({
         setActiveIndex((prev) => (prev > 0 ? prev - 1 : 0));
         break;
       case "Enter":
-        e.preventDefault();
         if (activeIndex >= 0 && options[activeIndex]) {
+          e.preventDefault(); 
           handleSelect(options[activeIndex]);
         }
         break;
@@ -148,7 +148,6 @@ export default function AsyncSelect({
     }
   };
 
-  // Auto-scroll list saat navigasi keyboard
   useEffect(() => {
     if (activeIndex !== -1 && listRef.current) {
       const activeItem = listRef.current.children[activeIndex] as HTMLElement;
@@ -168,12 +167,13 @@ export default function AsyncSelect({
 
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full bg-white rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer transition-all border ${error
+        className={`w-full bg-white rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer transition-all border ${
+          error
             ? "border-red-500"
             : isOpen
-              ? "border-blue-500 ring-2 ring-blue-50"
-              : "border-gray-300 hover:border-gray-400"
-          }`}
+            ? "border-blue-500 ring-2 ring-blue-50"
+            : "border-gray-300 hover:border-gray-400"
+        }`}
       >
         <span className={`text-sm ${!selectedLabel ? "text-gray-400" : "text-gray-800 font-medium"}`}>
           {selectedLabel || placeholder}
@@ -183,8 +183,9 @@ export default function AsyncSelect({
 
       {isOpen && (
         <div
-          className={`absolute z-[110] w-full bg-white rounded-2xl border border-gray-200 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 ${dropUp ? "bottom-full mb-2" : "top-full mt-2"
-            }`}
+          className={`absolute z-[110] w-full bg-white rounded-2xl border border-gray-200 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 ${
+            dropUp ? "bottom-full mb-2" : "top-full mt-2"
+          }`}
         >
           <div className="p-3 border-b border-gray-100 flex items-center gap-3 bg-gray-50/50">
             <Search size={16} className="text-gray-400" />
@@ -205,10 +206,11 @@ export default function AsyncSelect({
                   key={opt.value}
                   onClick={() => handleSelect(opt)}
                   onMouseEnter={() => setActiveIndex(index)}
-                  className={`px-4 py-3 rounded-xl text-sm transition-all cursor-pointer mb-1 last:mb-0 ${activeIndex === index
+                  className={`px-4 py-3 rounded-xl text-sm transition-all cursor-pointer mb-1 last:mb-0 ${
+                    activeIndex === index
                       ? "bg-blue-600 text-white shadow-md shadow-blue-100 scale-[0.98]"
                       : "text-gray-700 hover:bg-blue-50"
-                    }`}
+                  }`}
                 >
                   <div className="flex flex-col">
                     <span className="font-bold">{opt.label}</span>

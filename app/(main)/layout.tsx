@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation"; // Import ini buat dengerin perubahan URL
 import Sidebar from "@/src/components/Sidebar";
 import Navbar from "@/src/components/Navbar";
 import { useAuth } from "@/src/context/AuthContext";
 import { useRouter } from "next/navigation";
+import ForbiddenPage from "./forbidden/page"; // Import UI 403 lu
 
 export default function DashboardLayout({
   children,
@@ -12,7 +14,10 @@ export default function DashboardLayout({
 }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname(); 
+  
   const [isOpen, setIsOpen] = useState(false);
+  const [isForbidden, setIsForbidden] = useState(false); 
 
   useEffect(() => {
     const isMobile = window.innerWidth < 1024;
@@ -24,12 +29,25 @@ export default function DashboardLayout({
     }
   }, []);
 
+  useEffect(() => {
+    const handleForbidden = () => setIsForbidden(true);
+
+    window.addEventListener("api-forbidden", handleForbidden);
+
+    setIsForbidden(false);
+
+    return () => {
+      window.removeEventListener("api-forbidden", handleForbidden);
+    };
+  }, [pathname]);
+
   const toggleSidebar = () => {
     const newState = !isOpen;
     setIsOpen(newState);
     localStorage.setItem("sidebar_open", newState.toString());
   };
 
+  // Loading State
   if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-white">
@@ -57,7 +75,13 @@ export default function DashboardLayout({
       >
         <Navbar isOpen={isOpen} toggle={toggleSidebar} />
 
-        <main className="p-6">{children}</main>
+        <main className="p-6">
+          {isForbidden ? (
+            <ForbiddenPage />
+          ) : (
+            children
+          )}
+        </main>
       </div>
     </div>
   );

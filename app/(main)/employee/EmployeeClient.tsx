@@ -152,9 +152,9 @@ export default function EmployeePage() {
                             {/* Mobile Avatar */}
                             {item.photoUrl ? (
                                 <img
-                                    src={item.photoUrl}
+                                    src={`${process.env.NEXT_PUBLIC_API_URL}${item.photoUrl}`}
                                     alt={item.fullName}
-                                    className="w-12 h-12 rounded-full object-cover border-2 border-blue-50"
+                                    className="w-8 h-8 rounded-full object-cover border border-gray-100"
                                 />
                             ) : (
                                 <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-sm font-black text-blue-500">
@@ -208,10 +208,10 @@ export default function EmployeePage() {
                             <ImageUpload
                                 value={
                                     form.photo ?
-                                    URL.createObjectURL(form.photo)
-                                    :form.photoUrl
-                                    ? `${process.env.NEXT_PUBLIC_API_URL}${form.photoUrl}`
-                                    :""
+                                        URL.createObjectURL(form.photo)
+                                        : form.photoUrl
+                                            ? `${process.env.NEXT_PUBLIC_API_URL}${form.photoUrl}`
+                                            : ""
                                 }
                                 onChange={(file) => {
                                     setForm({ ...form, photo: file });

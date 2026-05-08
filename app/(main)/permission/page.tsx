@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import PermissionPage from "./PermissionClient";
 export const metadata: Metadata = {
-  title: "Item",
+  title: "Permission",
 };
 
 export default function Page() {

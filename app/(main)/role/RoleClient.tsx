@@ -81,17 +81,45 @@ export default function RolePage() {
         />
       </main>
 
-      <FormShell isOpen={actions.isModalOpen} onClose={() => actions.setIsModalOpen(false)} title={actions.selectedRole ? "Edit Role" : "Tambah Role"}>
-        <form onSubmit={actions.handleSave} className="flex flex-col h-[650px] overflow-hidden">
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-8 custom-scrollbar">
-            <Input label="Nama Role" required value={actions.form.name} error={actions.serverErrors.Name?.[0]}
-              onChange={e => { actions.setForm({ ...actions.form, name: e.target.value }); actions.setServerErrors({ ...actions.serverErrors, Name: [] }) }}
-            />
-            <PermissionSelector selectedIds={actions.form.permissionIds} onChange={ids => actions.setForm({ ...actions.form, permissionIds: ids })} />
+      <FormShell
+        isOpen={actions.isModalOpen}
+        onClose={() => actions.setIsModalOpen(false)}
+        title={actions.selectedRole ? "Edit Role" : "Tambah Role"}
+      >
+        {/* HAPUS h-[650px]! Pake h-full aja biar dia nurut sama FormShell */}
+        <form onSubmit={actions.handleSave} className="flex flex-col h-full overflow-hidden">
+
+          {/* PENTING: flex-1 dan min-h-0 biar area ini bisa menciut */}
+          <div className="flex-1 min-h-0 flex flex-col px-6 py-4 space-y-6">
+
+            {/* Input Nama Role (Tetap di atas) */}
+            <div className="flex-none">
+              <Input
+                label="Nama Role"
+                required
+                value={actions.form.name}
+                error={actions.serverErrors.Name?.[0]}
+                onChange={e => {
+                  actions.setForm({ ...actions.form, name: e.target.value });
+                  actions.setServerErrors({ ...actions.serverErrors, Name: [] })
+                }}
+              />
+            </div>
+
+            {/* PermissionSelector: Kita kasih sisa space di sini */}
+            <div className="flex-1 min-h-0">
+              <PermissionSelector
+                selectedIds={actions.form.permissionIds}
+                onChange={ids => actions.setForm({ ...actions.form, permissionIds: ids })}
+              />
+            </div>
+
           </div>
-          <footer className="p-6 bg-white border-t border-gray-100 flex gap-4 shadow-[0_-15px_30px_-15px_rgba(0,0,0,0.05)]">
-            <Button type="button" variant="outline" className="flex-1 rounded-2xl h-12 font-bold uppercase text-[10px]" onClick={() => actions.setIsModalOpen(false)}>Batal</Button>
-            <Button type="submit" className="flex-1 rounded-2xl h-12 bg-blue-600 text-white shadow-lg shadow-blue-100 font-bold uppercase text-[10px]" icon={<Save size={18} />} isLoading={actions.isSubmitting}>Simpan Perubahan</Button>
+
+          {/* Footer (Tetap di bawah) */}
+          <footer className="flex-none p-6 bg-white border-t border-gray-100 flex gap-4">
+            <Button type="button" variant="outline" className="flex-1 h-12" onClick={() => actions.setIsModalOpen(false)}>Batal</Button>
+            <Button type="submit" className="flex-1 h-12 bg-blue-600 text-white" isLoading={actions.isSubmitting}>Simpan</Button>
           </footer>
         </form>
       </FormShell>
