@@ -12,14 +12,14 @@ export const startSignalR = async (token: string) => {
         .build();
 
     connection.on("OnPermissionChanged", async () => {
-        console.warn("🔔 Permission changed, refreshing token....");
+        console.warn("Permission changed, refreshing token....");
 
         try {
             const oldToken = sessionStorage.getItem("token");
             const refreshToken = sessionStorage.getItem("refreshToken");
 
             if (!oldToken || !refreshToken) {
-                console.error("❌ Refresh failed: Tokens not found in storage");
+                console.error("Refresh failed: Tokens not found in storage");
                 return;
             }
 
@@ -32,12 +32,12 @@ export const startSignalR = async (token: string) => {
                 sessionStorage.setItem("token", res.data.token);
                 sessionStorage.setItem("refreshToken", res.data.refreshToken);
 
-                console.log("✅ Token successfully refreshed via SignalR trigger.");
+                console.log("Token successfully refreshed via SignalR trigger.");
 
             }
 
         } catch (err) {
-            console.error("❌ SignalR Refresh Error", err);
+            console.error("SignalR Refresh Error", err);
 
         }
     });
@@ -45,11 +45,10 @@ export const startSignalR = async (token: string) => {
     if (connection.state === SignalR.HubConnectionState.Disconnected) {
         try {
             await connection.start();
-            console.log("✅ SignalR Connected (WebSocket Direct)");
+            console.log("SignalR Connected (WebSocket Direct)");
         } catch (err) {
-            // Jika error karena 'stop()', kita abaikan saja agar tidak memenuhi log
             if (err instanceof Error && !err.message.includes("stop() was called")) {
-                console.error("❌ SignalR Connection Error: ", err);
+                console.error("SignalR Connection Error: ", err);
             }
         }
     }

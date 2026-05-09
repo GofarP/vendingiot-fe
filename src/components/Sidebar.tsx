@@ -87,12 +87,7 @@ const menuGroups = [
       },
     ],
   },
-  {
-    title: "Sistem",
-    items: [
-      { name: "Pengaturan", href: "/dashboard/settings", icon: Settings },
-    ],
-  },
+  
 ];
 
 export default function Sidebar({
@@ -157,7 +152,7 @@ export default function Sidebar({
                   <Link
                     key={item.name}
                     href={item.href}
-                    onClick={handleItemClick} // Menggunakan fungsi pengecekan lebar layar
+                    onClick={handleItemClick}
                     className={`flex items-center justify-between p-3 rounded-xl transition-all ${
                       active
                         ? "bg-blue-600 shadow-lg shadow-blue-900/50"

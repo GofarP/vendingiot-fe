@@ -8,78 +8,74 @@ import axiosInstance from "../lib/axios";
 export default function SignalRListener() {
   const { user, isLoading, setUser } = useAuth();
   const connectionRef = useRef<any>(null);
+  const isRestarting = useRef(false);
 
   useEffect(() => {
     if (isLoading || !user) return;
 
     const init = async () => {
       const token = sessionStorage.getItem("token");
-
-      if (!token) {
-        console.warn("⚠️ SignalR: Token tidak ditemukan di sessionStorage.");
-        return;
-      }
+      if (!token) return;
 
       try {
-        if (!connectionRef.current) {
-          connectionRef.current = await startSignalR(token);
-          console.log("✅ SignalR Connected for:", user.email);
+        if (connectionRef.current && !isRestarting.current) return;
 
-          connectionRef.current.on("OnPermissionChanged", async () => {
-            console.warn("🔔 Sinyal diterima: Izin berubah. Merefresh token...");
+        connectionRef.current = await startSignalR(token);
+        console.log("✅ SignalR Connected");
+        isRestarting.current = false;
 
-            try {
-              const oldToken = sessionStorage.getItem("token");
-              const refreshToken = sessionStorage.getItem("refreshToken");
+        connectionRef.current.on("OnPermissionChanged", async () => {
+          console.warn("🔔 Izin berubah. Merefresh...");
 
-              if (!oldToken || !refreshToken) {
-                console.error("❌ Gagal refresh: Token tidak lengkap di storage.");
-                return;
-              }
+          try {
+            const oldToken = sessionStorage.getItem("token");
+            const refreshToken = sessionStorage.getItem("refreshToken");
 
-              const res = await axiosInstance.post("/api/auth/refresh", {
-                accessToken: oldToken,
-                refreshToken: refreshToken,
+            const res = await axiosInstance.post("/api/auth/refresh", {
+              accessToken: oldToken,
+              refreshToken: refreshToken,
+            });
+
+
+            if (res.status === 200 && res.data.token) {
+              isRestarting.current = true; 
+
+              // 1. Update Token di storage DULU sebelum update State
+              sessionStorage.setItem("token", res.data.token);
+              sessionStorage.setItem("refreshToken", res.data.refreshToken);
+
+              setUser({
+                ...res.data,
+                accessToken: res.data.token,
+                tokenType: res.data.tokenType || "Bearer"
               });
 
-              if (res.status === 200 && res.data.token) {
-                const updatedUserData = {
-                  ...res.data, 
-                  accessToken: res.data.token, 
-                  tokenType: res.data.tokenType || "Bearer" 
-                };
-                
-                setUser(updatedUserData);
-
-                sessionStorage.setItem("token", res.data.token);
-                sessionStorage.setItem("refreshToken", res.data.refreshToken);
-
-                console.log("State User & Sidebar berhasil diperbarui otomatis!");
+              if (connectionRef.current) {
+                await connectionRef.current.stop();
+                connectionRef.current = null;
               }
-            } catch (refreshErr) {
-              console.error("SignalR Refresh Token Error:", refreshErr);
             }
-          });
-        }
+          } catch (refreshErr) {
+            console.error("❌ Refresh Error:", refreshErr);
+            isRestarting.current = false;
+          }
+        });
       } catch (err) {
-        console.error("SignalR Init Error:", err);
+        console.error("❌ SignalR Connection Error:", err);
+        isRestarting.current = false;
       }
     };
 
     init();
 
     return () => {
-      if (connectionRef.current) {
-        connectionRef.current
-          .stop()
-          .then(() => {
-            console.log("👋 SignalR Disconnected");
-            connectionRef.current = null;
-          })
-          .catch((err: any) => console.warn("SignalR Stop Error:", err));
+      if (connectionRef.current && !isRestarting.current) {
+        connectionRef.current.stop();
+        connectionRef.current = null;
+        console.log("👋 SignalR Stopped (Logout/Unmount)");
       }
     };
-  }, [user, isLoading, setUser]);
+  }, [user, isLoading, setUser]); 
 
   return null;
 }
