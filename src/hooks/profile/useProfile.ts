@@ -1,14 +1,15 @@
 import { useState } from "react";
 import profileService, { ChangePassword, UpdateProfile } from "@/src/services/profileServices";
 import { useAuth } from "@/src/context/AuthContext";
-import {toast} from 'sonner';
+import { toast } from 'sonner';
 
 export const useProfile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { setUser } = useAuth();
+  const [error, setError] = useState<string | null>(null);
 
 
-  const updateInfo = async (data: UpdateProfile) => {
+  const updateProfile = async (data: UpdateProfile) => {
     setIsLoading(true);
     try {
       const response = await profileService.updateProfile(data);
@@ -25,6 +26,7 @@ export const useProfile = () => {
       toast.success(response.message || "Profil diperbarui!");
       return { success: true };
     } catch (err: any) {
+      setError(err.response?.data?.message || "Gagal memeperbaharui profile")
       const msg = err.response?.data?.message || "Gagal memperbarui profil";
       toast.error(msg);
       return { success: false, error: msg };
@@ -33,7 +35,7 @@ export const useProfile = () => {
     }
   };
 
- 
+
   const changeUserPassword = async (data: ChangePassword) => {
     setIsLoading(true);
     try {
@@ -41,6 +43,8 @@ export const useProfile = () => {
       toast.success(response.message || "Password berhasil diganti!");
       return { success: true };
     } catch (err: any) {
+      setError(err.message || "Gagal memeperbaharui profile")
+      setError(err.response?.data?.message || "Gagal mengganti password")
       const msg = err.response?.data?.message || "Gagal mengganti password";
       toast.error(msg);
       return { success: false, error: msg };
@@ -50,8 +54,9 @@ export const useProfile = () => {
   };
 
   return {
-    updateInfo,
+    updateProfile,
     changeUserPassword,
     isLoading,
+    error
   };
 };

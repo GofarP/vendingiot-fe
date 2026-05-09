@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Menu, Bell, User, LogOut, Settings, ChevronDown } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useLogout } from "../hooks/logout/useLogout"; // Sesuaikan path hook logout kamu
+import Link from "next/link";
 
 interface NavbarProps {
   isOpen: boolean;
@@ -90,15 +91,14 @@ export default function Navbar({ isOpen, toggle }: NavbarProps) {
                 </p>
               </div>
 
-              <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+              <Link
+                href="/profile"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+              >
                 <User size={16} />
                 <span>Profil Saya</span>
-              </button>
+              </Link>
 
-              <button className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors">
-                <Settings size={16} />
-                <span>Pengaturan</span>
-              </button>
 
               <div className="h-px bg-gray-100 my-1"></div>
 
