@@ -16,7 +16,6 @@ export default function Navbar({ isOpen, toggle }: NavbarProps) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown saat klik di luar area
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -68,13 +67,27 @@ export default function Navbar({ isOpen, toggle }: NavbarProps) {
               </p>
             </div>
 
-            <div className="w-10 h-10 bg-linear-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center text-gray-500 border border-gray-300 shadow-sm relative">
-              <User size={20} />
-              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+            {/* AVATAR LOGIC START */}
+            <div className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 shadow-sm relative overflow-hidden bg-linear-to-br from-blue-500 to-indigo-600">
+              {user?.photo ? (
+                <img
+                  src={`${process.env.NEXT_PUBLIC_API_URL}${user.photo}`}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-sm font-black text-white uppercase">
+                  {user?.fullName ? user.fullName[0] : "U"}
+                </span>
+              )}
+
             </div>
+
             <ChevronDown
               size={14}
-              className={`text-gray-400 transition-transform ${isProfileOpen ? "rotate-180" : ""}`}
+              className={`text-gray-400 transition-transform ${
+                isProfileOpen ? "rotate-180" : ""
+              }`}
             />
           </button>
 
@@ -85,8 +98,7 @@ export default function Navbar({ isOpen, toggle }: NavbarProps) {
                   {user?.fullName}
                 </p>
                 <p className="text-xs text-gray-500">{user?.email}</p>
-                <p className="text-xs text-blue-600">
-                  {" "}
+                <p className="text-xs text-blue-600 uppercase font-bold tracking-tighter">
                   {user?.roles?.[0] || "No Role"}
                 </p>
               </div>
@@ -98,7 +110,6 @@ export default function Navbar({ isOpen, toggle }: NavbarProps) {
                 <User size={16} />
                 <span>Profil Saya</span>
               </Link>
-
 
               <div className="h-px bg-gray-100 my-1"></div>
 

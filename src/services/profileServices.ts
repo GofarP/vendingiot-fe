@@ -21,20 +21,19 @@ export interface ChangePassword {
 const profileService = {
   
   getCurrentUser: async (): Promise<Profile> => {
-    const res = await axiosInstance.get("/api/profile/me");
+    const res = await axiosInstance.get("/api/auth/me");
     return res.data;
   },
 
   
   updateProfile: async (data: UpdateProfile) => {
-    const res = await axiosInstance.put("/api/profile/profile", data);
+    const res = await axiosInstance.put("/api/profile/updateprofile", data);
     return res.data;
   },
 
   
   changePassword: async (data: ChangePassword) => {
-    // Menyesuaikan dengan route [HttpPut("change-password")] di Backend
-    const res = await axiosInstance.put("/api/profile/change-password", data);
+    const res = await axiosInstance.put("/api/profile/changepassword", data);
     return res.data;
   }
 };
