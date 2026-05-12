@@ -17,7 +17,7 @@ export default function RootLayout({
           <AuthGuard>
             <SignalRListener token={token}/>
             {children}
-            <Toaster position="top-right" richColors />
+            <Toaster closeButton position="top-right" richColors />
           </AuthGuard>
         </AuthProvider>
       </body>

@@ -9,7 +9,7 @@ export interface LoginResponse{
   expiresIn:number;
   email:string;
   fullName:string;
-  photo:string;
+  photoUrl:string;
   roles:string[];
   permissions:string[];
 }

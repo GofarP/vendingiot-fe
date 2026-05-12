@@ -67,11 +67,10 @@ export default function Navbar({ isOpen, toggle }: NavbarProps) {
               </p>
             </div>
 
-            {/* AVATAR LOGIC START */}
             <div className="w-10 h-10 rounded-full flex items-center justify-center border border-gray-200 shadow-sm relative overflow-hidden bg-linear-to-br from-blue-500 to-indigo-600">
-              {user?.photo ? (
+              {user?.photoUrl ? (
                 <img
-                  src={`${process.env.NEXT_PUBLIC_API_URL}${user.photo}`}
+                  src={`${process.env.NEXT_PUBLIC_API_URL}/uploads/users/${user.photoUrl}`}
                   alt="Avatar"
                   className="w-full h-full object-cover"
                 />

@@ -8,11 +8,10 @@ export const useProfile = () => {
   const { setUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
-
-  const updateProfile = async (data: UpdateProfile) => {
+  const updateProfile = async (data: UpdateProfile, photo?: File) => {
     setIsLoading(true);
     try {
-      const response = await profileService.updateProfile(data);
+      const response = await profileService.updateProfile(data, photo);
 
       const token = sessionStorage.getItem("token");
       const refreshToken = sessionStorage.getItem("refreshToken");

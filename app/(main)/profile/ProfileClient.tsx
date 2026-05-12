@@ -16,6 +16,7 @@ import { useAuth } from "@/src/context/AuthContext";
 import FormShell from "@/src/components/FormShell";
 import Input from "@/src/components/Input";
 import Button from "@/src/components/Button";
+import ImageUpload from "@/src/components/ImageUpload";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -56,10 +57,19 @@ export default function ProfilePage() {
           <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center space-y-6">
             <div className="relative">
               <div className="w-32 h-32 bg-slate-50 rounded-full flex items-center justify-center border border-gray-100 shadow-inner">
-                <User size={50} className="text-blue-600/50" />
+                {user?.photoUrl ? (
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_API_URL}/uploads/users/${user.photoUrl}`}
+                    alt="Avatar"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <span className="text-sm font-black text-white uppercase">
+                    {user?.fullName ? user.fullName[0] : "U"}
+                  </span>
+                )}
               </div>
-              <div className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 border-4 border-white rounded-full"></div>
-            </div>
+              </div>
 
             <div>
               <h4 className="text-xl font-black text-gray-900 uppercase italic tracking-tight leading-none">
@@ -171,6 +181,22 @@ export default function ProfilePage() {
         title="Edit Profile Information"
       >
         <form onSubmit={handleUpdateInfo} className="space-y-8 py-2">
+          <div className="bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 flex justify-center shadow-inner">
+            <ImageUpload
+              value={
+                form.photo ?
+                  URL.createObjectURL(form.photo)
+                  : form.photoUrl
+                    ? `${process.env.NEXT_PUBLIC_API_URL}/uploads/users/${form.photoUrl}`
+                    : ""
+              }
+              onChange={(file) => {
+                setForm({ ...form, photo: file });
+                if (serverErrors?.Photo) setServerErrors({ ...serverErrors, Photo: [] });
+              }}
+              error={serverErrors?.Photo?.[0]}
+            />
+          </div>
           <Input
             label="Full Name"
             placeholder="Masukkan Nama Lengkap"

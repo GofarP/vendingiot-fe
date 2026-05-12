@@ -13,7 +13,7 @@ export const useProfileAction = () => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   // Form States
-  const [form, setForm] = useState<UpdateProfile>({ fullName: "", email: "" });
+  const [form, setForm] = useState<UpdateProfile>({ fullName: "", email: "",photoUrl:"",photo:null });
   const [passwordForm, setPasswordForm] = useState<ChangePassword>({
     oldPassword: "",
     newPassword: "",
@@ -33,6 +33,7 @@ export const useProfileAction = () => {
     resetForms();
     if (user) {
       setForm({
+        photoUrl:user.photoUrl,
         fullName: user.fullName,
         email: user.email,
       });
