@@ -5,7 +5,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string; // Buat jadi opsional
   description?: string;
   error?: string;
-  leftIcon?: React.ReactNode; // Tambahkan prop ikon kiri
+  leftIcon?: React.ReactNode; 
 }
 
 const Input = ({

@@ -2,7 +2,6 @@
 import { Plus, Pencil, Trash2, Save, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
-import { useEffect } from "react";
 import DataTable from "@/src/components/DataTable";
 import Input from "@/src/components/Input";
 import Button from "@/src/components/Button";
@@ -12,6 +11,7 @@ import { useEmployee } from "@/src/hooks/employee/useEmployee";
 import { useEmployeeActions } from "@/src/hooks/employee/useEmployeeAction";
 import ImageUpload from "@/src/components/ImageUpload";
 import AsyncSelect from "@/src/components/AsyncSelect";
+import { useAuth } from "@/src/context/AuthContext";
 
 export default function EmployeePage() {
     const {
@@ -42,6 +42,8 @@ export default function EmployeePage() {
         handleSave,
     } = useEmployeeActions({ addEmployee, updateEmployee });
 
+    const { hasPermission, isLoading } = useAuth();
+
     const handleDelete = async (id: number) => {
         if (confirm("Apakah Anda yakin ingin menghapus karyawan ini?")) {
             const res = await deleteEmployee(id);
@@ -52,6 +54,11 @@ export default function EmployeePage() {
             }
         }
     }
+
+    const canCreate=hasPermission('create-employee');
+    const canEdit = hasPermission('edit-employee');
+    const canDelete = hasPermission("delete-employee");
+
 
     return (
         <div className="space-y-6">
@@ -64,13 +71,16 @@ export default function EmployeePage() {
                         Management of employee
                     </p>
                 </div>
-                <Button
+                {canCreate? (<Button
                     onClick={handleOpenAdd}
                     icon={<Plus size={20} />}
                     className="w-full md:w-auto"
                 >
                     Tambah Data
-                </Button>
+                </Button>):(
+                    <></>
+                )}
+                
             </div>
             {error && (
                 <div className="bg-red-50 border border-red-100 p-4 rounded-2xl flex items-center gap-3 text-red-600 text-sm font-medium">
@@ -126,25 +136,38 @@ export default function EmployeePage() {
                             </span>
                         ),
                     },
-                    {
-                        label: "Actions",
-                        render: (item) => (
-                            <div className="flex gap-1 pr-4">
-                                <button
-                                    onClick={() => handleOpenEdit(item)}
-                                    className="p-2 text-yellow-500 hover:bg-yellow-50 rounded-xl transition-all"
-                                >
-                                    <Pencil size={15} />
-                                </button>
-                                <button
-                                    onClick={() => item.id && handleDelete(item.id)}
-                                    className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                                >
-                                    <Trash2 size={15} />
-                                </button>
-                            </div>
-                        ),
-                    },
+                    ...(canEdit || canDelete
+                        ? [
+                            {
+                                label: "Actions",
+                                render: (item: any) => (
+                                    <div className="flex gap-1 pr-4">
+                                        {/* Gerbang kedua: Tombol Edit */}
+                                        {canEdit && (
+                                            <button
+                                                onClick={() => handleOpenEdit(item)}
+                                                className="p-2 text-yellow-500 hover:bg-yellow-50 rounded-xl transition-all"
+                                                title="Edit Karyawan"
+                                            >
+                                                <Pencil size={15} />
+                                            </button>
+                                        )}
+
+                                        {/* Gerbang ketiga: Tombol Hapus */}
+                                        {canDelete && (
+                                            <button
+                                                onClick={() => item.id && handleDelete(item.id)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                                title="Hapus Karyawan"
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
+                                        )}
+                                    </div>
+                                ),
+                            },
+                        ]
+                        : []),
                 ]}
                 renderMobileCard={(item) => (
                     <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-5">
@@ -172,22 +195,27 @@ export default function EmployeePage() {
                         </div>
 
                         <div className="flex gap-2 pt-2">
-                            <Button
-                                variant="outline"
-                                className="flex-1 text-yellow-500 bg-yellow-100 border-none h-12 rounded-2xl"
-                                onClick={() => handleOpenEdit(item)}
-                                icon={<Pencil size={14} />}
-                            >
-                                Edit
-                            </Button>
-                            <Button
-                                variant="danger"
-                                className="flex-1 h-12 rounded-2xl"
-                                onClick={() => item.id && handleDelete(item.id)}
-                                icon={<Trash2 size={14} />}
-                            >
-                                Hapus
-                            </Button>
+                            {hasPermission("edit-employee") && (
+                                <Button
+                                    variant="outline"
+                                    className="flex-1 text-yellow-500 bg-yellow-100 border-none h-12 rounded-2xl"
+                                    onClick={() => handleOpenEdit(item)}
+                                    icon={<Pencil size={14} />}
+                                >
+                                    Edit
+                                </Button>
+                            )}
+
+                            {hasPermission("delete-employee") && (
+                                <Button
+                                    variant="danger"
+                                    className="flex-1 h-12 rounded-2xl"
+                                    onClick={() => item.id && handleDelete(item.id)}
+                                    icon={<Trash2 size={14} />}
+                                >
+                                    Hapus
+                                </Button>
+                            )}
                         </div>
                     </div>
                 )}
@@ -197,87 +225,14 @@ export default function EmployeePage() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 title={selectedEmployee ? "Edit Employee" : "Tambah Employee"}
-
-            >
-                <form
-                    onSubmit={handleSave}
-                    className="relative flex flex-col h-[550px] overflow-hidden"
-                >
-                    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 overscroll-contain custom-scrollbar">
-                        <div className="bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 flex justify-center shadow-inner">
-                            <ImageUpload
-                                value={
-                                    form.photo ?
-                                        URL.createObjectURL(form.photo)
-                                        : form.photoUrl
-                                            ? `${process.env.NEXT_PUBLIC_API_URL}${form.photoUrl}`
-                                            : ""
-                                }
-                                onChange={(file) => {
-                                    setForm({ ...form, photo: file });
-                                    if (serverErrors?.Photo) setServerErrors({ ...serverErrors, Photo: [] });
-                                }}
-                                error={serverErrors?.Photo?.[0]}
-                            />
-                        </div>
-
-                        <div className="grid gap-5">
-                            <Input
-                                label="Full Name"
-                                placeholder="Masukkan nama lengkap"
-                                required
-                                value={form.fullName}
-                                error={serverErrors?.FullName?.[0]}
-                                onChange={(e) => {
-                                    setForm({ ...form, fullName: e.target.value });
-                                    if (serverErrors?.FullName) setServerErrors({ ...serverErrors, FullName: [] });
-                                }}
-                            />
-
-                            <Input
-                                label="Email Address"
-                                type="email"
-                                placeholder="email@vending.com"
-                                required
-                                value={form.email}
-                                error={serverErrors?.Email?.[0]}
-                                onChange={(e) => {
-                                    setForm({ ...form, email: e.target.value });
-                                    if (serverErrors?.Email) setServerErrors({ ...serverErrors, Email: [] });
-                                }}
-                            />
-
-                            <Input
-                                label="Password"
-                                type="password"
-                                placeholder={selectedEmployee ? "Kosongkan jika tidak berubah" : "Minimal 6 karakter"}
-                                value={form.password || ""}
-                                error={serverErrors?.Password?.[0]}
-                                onChange={(e) => {
-                                    setForm({ ...form, password: e.target.value });
-                                    if (serverErrors?.Password) setServerErrors({ ...serverErrors, Password: [] });
-                                }}
-                            />
-                            <AsyncSelect
-                                label="Employee Role"
-                                apiEndpoint="/api/role"
-                                value={form.roleId ?? 0}
-                                initialLabel={selectedEmployee?.role?.name || ""}
-                                onChange={(val) => {
-                                    setForm({ ...form, roleId: String(val) });
-                                    if (serverErrors?.RoleId)
-                                        setServerErrors({ ...serverErrors, roleId: [] });
-                                }}
-                                error={serverErrors?.RoleId?.[0]}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex-none px-6 py-6 bg-white border-t border-gray-100 flex gap-3 shadow-[0_-15px_30px_-15px_rgba(0,0,0,0.05)]">
+                // Gunakan default max-w-xl karena form ini tipenya vertical (satu kolom)
+                maxWidthClass="max-w-xl"
+                footer={
+                    <>
                         <Button
                             type="button"
                             variant="outline"
-                            className="flex-1 rounded-2xl h-12 font-bold uppercase tracking-wider text-[10px]"
+                            className="flex-1 rounded-2xl h-12 font-black uppercase tracking-widest text-[10px]"
                             disabled={isSubmitting}
                             onClick={() => setIsModalOpen(false)}
                         >
@@ -285,12 +240,92 @@ export default function EmployeePage() {
                         </Button>
                         <Button
                             type="submit"
-                            className="flex-1 rounded-2xl h-12 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-100 font-bold uppercase tracking-wider text-[10px]"
+                            // Trigger submit form secara manual atau pindahkan form wrapper ke luar footer
+                            form="employee-form"
+                            className="flex-1 rounded-2xl h-12 bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-100 font-black uppercase tracking-widest text-[10px]"
                             icon={<Save size={16} />}
                             isLoading={isSubmitting}
                         >
                             {selectedEmployee ? "Update" : "Simpan"}
                         </Button>
+                    </>
+                }
+            >
+                {/* Form ID ditambahkan agar tombol di footer bisa mentrigger submit */}
+                <form
+                    id="employee-form"
+                    onSubmit={handleSave}
+                    className="flex flex-col space-y-6"
+                >
+                    {/* Kontainer Foto Profil */}
+                    <div className="bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 flex justify-center shadow-inner">
+                        <ImageUpload
+                            value={
+                                form.photo ?
+                                    URL.createObjectURL(form.photo)
+                                    : form.photoUrl
+                                        ? `${process.env.NEXT_PUBLIC_API_URL}${form.photoUrl}`
+                                        : ""
+                            }
+                            onChange={(file) => {
+                                setForm({ ...form, photo: file });
+                                if (serverErrors?.Photo) setServerErrors({ ...serverErrors, Photo: [] });
+                            }}
+                            error={serverErrors?.Photo?.[0]}
+                        />
+                    </div>
+
+                    {/* Input Fields */}
+                    <div className="grid gap-5">
+                        <Input
+                            label="Full Name"
+                            placeholder="Masukkan nama lengkap"
+                            required
+                            value={form.fullName}
+                            error={serverErrors?.FullName?.[0]}
+                            onChange={(e) => {
+                                setForm({ ...form, fullName: e.target.value });
+                                if (serverErrors?.FullName) setServerErrors({ ...serverErrors, FullName: [] });
+                            }}
+                        />
+
+                        <Input
+                            label="Email Address"
+                            type="email"
+                            placeholder="email@vending.com"
+                            required
+                            value={form.email}
+                            error={serverErrors?.Email?.[0]}
+                            onChange={(e) => {
+                                setForm({ ...form, email: e.target.value });
+                                if (serverErrors?.Email) setServerErrors({ ...serverErrors, Email: [] });
+                            }}
+                        />
+
+                        <Input
+                            label="Password"
+                            type="password"
+                            placeholder={selectedEmployee ? "Kosongkan jika tidak berubah" : "Minimal 6 karakter"}
+                            value={form.password || ""}
+                            error={serverErrors?.Password?.[0]}
+                            onChange={(e) => {
+                                setForm({ ...form, password: e.target.value });
+                                if (serverErrors?.Password) setServerErrors({ ...serverErrors, Password: [] });
+                            }}
+                        />
+
+                        <AsyncSelect
+                            label="Employee Role"
+                            apiEndpoint="/api/role"
+                            value={form.roleId ?? 0}
+                            initialLabel={selectedEmployee?.role?.name || ""}
+                            onChange={(val) => {
+                                setForm({ ...form, roleId: String(val) });
+                                if (serverErrors?.RoleId)
+                                    setServerErrors({ ...serverErrors, roleId: [] });
+                            }}
+                            error={serverErrors?.RoleId?.[0]}
+                        />
                     </div>
                 </form>
             </FormShell>

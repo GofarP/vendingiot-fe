@@ -86,16 +86,13 @@ export default function RolePage() {
         onClose={() => actions.setIsModalOpen(false)}
         title={actions.selectedRole ? "Edit Role" : "Tambah Role"}
       >
-        {/* HAPUS h-[650px]! Pake h-full aja biar dia nurut sama FormShell */}
-        <form onSubmit={actions.handleSave} className="flex flex-col h-full overflow-hidden">
+        <form onSubmit={actions.handleSave} className="flex flex-col h-[80vh] overflow-hidden">
+          <div className="flex-1 min-h-0 flex flex-col px-8 py-6 space-y-8">
 
-          {/* PENTING: flex-1 dan min-h-0 biar area ini bisa menciut */}
-          <div className="flex-1 min-h-0 flex flex-col px-6 py-4 space-y-6">
-
-            {/* Input Nama Role (Tetap di atas) */}
-            <div className="flex-none">
+            <div className="flex-none max-w-md"> 
               <Input
                 label="Nama Role"
+                placeholder="Contoh: Operator Mesin"
                 required
                 value={actions.form.name}
                 error={actions.serverErrors.Name?.[0]}
@@ -106,20 +103,17 @@ export default function RolePage() {
               />
             </div>
 
-            {/* PermissionSelector: Kita kasih sisa space di sini */}
             <div className="flex-1 min-h-0">
               <PermissionSelector
                 selectedIds={actions.form.permissionIds}
                 onChange={ids => actions.setForm({ ...actions.form, permissionIds: ids })}
               />
             </div>
-
           </div>
 
-          {/* Footer (Tetap di bawah) */}
-          <footer className="flex-none p-6 bg-white border-t border-gray-100 flex gap-4">
-            <Button type="button" variant="outline" className="flex-1 h-12" onClick={() => actions.setIsModalOpen(false)}>Batal</Button>
-            <Button type="submit" className="flex-1 h-12 bg-blue-600 text-white" isLoading={actions.isSubmitting}>Simpan</Button>
+          <footer className="flex-none p-8 bg-white border-t border-gray-100 flex justify-end gap-4">
+            <Button type="button" variant="outline" className="w-32 h-12" onClick={() => actions.setIsModalOpen(false)}>Batal</Button>
+            <Button type="submit" className="w-40 h-12 bg-blue-600 text-white shadow-lg shadow-blue-200" isLoading={actions.isSubmitting}>Simpan Role</Button>
           </footer>
         </form>
       </FormShell>
